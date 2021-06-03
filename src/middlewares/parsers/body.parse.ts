@@ -32,29 +32,32 @@ export class BodySchemaParser {
     let content = null;
     for (const type of contentType.equivalents()) {
       content = requestBody.content[type];
-      if (content) break;
-    }
-
-    if (!content) {
-      for (const requestContentType of Object.keys(requestBody.content)
-        .sort()
-        .reverse()) {
-        if (requestContentType === '*/*') {
-          content = requestBody.content[requestContentType];
-          break;
-        }
-
-        if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) continue; // not a wildcard of type application/*
-
-        const [type] = requestContentType.split('/', 1);
-
-        if (new RegExp(`^${type}\/.+$`).test(contentType.contentType)) {
-          content = requestBody.content[requestContentType];
-          break;
-        }
+      if (content) {
+        return content.schema ?? {};
       }
     }
 
+    for (const requestContentType of Object.keys(requestBody.content)
+      .sort()
+      .reverse()) {
+      if (requestContentType === '*/*') {
+        content = requestBody.content[requestContentType];
+        break;
+      }
+
+      if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) continue; // not a wildcard of type application/*
+
+      const [type] = requestContentType.split('/', 1);
+
+      if (new RegExp(`^${type}\/.+$`).test(contentType.contentType)) {
+        content = requestBody.content[requestContentType];
+        break;
+      }
+    }
+
+    if (!content) {
+      content = Object.values(requestBody.content)[0];
+    }
     return content?.schema ?? {};
   }
 }

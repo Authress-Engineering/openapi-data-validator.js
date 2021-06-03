@@ -27,7 +27,6 @@ export class OpenApiValidator {
     this.validateOptions(options);
     this.normalizeOptions(options);
 
-    if (options.validateApiSpec == null) options.validateApiSpec = true;
     if (options.validateRequests == null) options.validateRequests = true;
     if (options.unknownFormats == null) options.unknownFormats === true;
     if (options.validateFormats == null) options.validateFormats = 'fast';

@@ -21,13 +21,6 @@ export interface OpenAPIFrameworkInit {
   apiDoc: OpenAPIV3.Document;
   basePaths: string[];
 }
-export type SecurityHandlers = {
-  [key: string]: (
-    req: Request,
-    scopes: string[],
-    schema: OpenAPIV3.SecuritySchemeObject,
-  ) => boolean | Promise<boolean>;
-};
 
 export interface Options extends ajv.Options {
   // Specific options

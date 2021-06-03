@@ -114,8 +114,8 @@ export class RequestValidator {
 
       const data = {
         query: req.query ?? {},
-        headers: req.headers,
-        params: req.params,
+        headers: req.headers || {},
+        params: req.params || {},
         cookies,
         body: req.body,
       };

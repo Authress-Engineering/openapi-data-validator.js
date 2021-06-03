@@ -20,11 +20,7 @@ export class ContentType {
     }
   }
   public static from(req: OpenApiRequest): ContentType {
-    return new ContentType(req.headers['content-type']);
-  }
-
-  public static fromString(type: string): ContentType {
-    return new ContentType(type);
+    return new ContentType(req.headers?.['content-type']);
   }
 
   public equivalents(): string[] {
@@ -77,47 +73,3 @@ export function ajvErrorsToValidatorError(
     }),
   };
 }
-
-export const deprecationWarning =
-  process.env.NODE_ENV !== 'production' ? console.warn : () => {};
-
-/**
- *
- * @param accepts the list of accepted media types
- * @param expectedTypes - expected media types defined in the response schema
- * @returns the content-type
- */
-export const findResponseContent = function (
-  accepts: string[],
-  expectedTypes: string[],
-): string {
-  const expectedTypesSet = new Set(expectedTypes);
-  // if accepts are supplied, try to find a match, and use its validator
-  for (const accept of accepts) {
-    const act = ContentType.fromString(accept);
-    if (act.contentType === '*/*') {
-      return expectedTypes[0];
-    } else if (expectedTypesSet.has(act.contentType)) {
-      return act.contentType;
-    } else if (expectedTypesSet.has(act.mediaType)) {
-      return act.mediaType;
-    } else if (act.isWildCard) {
-      // wildcard of type application/*
-      const [type] = act.contentType.split('/', 1);
-
-      for (const expectedType of expectedTypesSet) {
-        if (new RegExp(`^${type}\/.+$`).test(expectedType)) {
-          return expectedType;
-        }
-      }
-    } else {
-      for (const expectedType of expectedTypes) {
-        const ect = ContentType.fromString(expectedType);
-        if (ect.mediaType === act.mediaType) {
-          return expectedType;
-        }
-      }
-    }
-  }
-  return null;
-};
