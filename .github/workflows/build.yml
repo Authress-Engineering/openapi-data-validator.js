@@ -23,9 +23,11 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
 
     - name: Install packages
-      run: npm install
+      run: npm ci
+    - name: Run Setup
+      run: node make.js setup
     - name: Run build
-      run: yarn build
+      run: npm run build
     - name: Deploy to NPM
       if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' && github.event_name == 'push'
       run: npm publish
@@ -37,3 +39,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: node make.js after_build
+    - name: Create Github Release and Tag
+      if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' && github.event_name == 'push'
+      run: |
+        git tag ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
+        git push origin ${GITHUB_REF/refs\/heads\/release\//}.$GITHUB_RUN_NUMBER
