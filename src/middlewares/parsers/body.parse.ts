@@ -3,7 +3,6 @@ import { ContentType } from '../util';
 import {
   OpenAPIV3,
   BodySchema,
-  UnsupportedMediaType,
 } from '../../framework/types';
 
 export class BodySchemaParser {
@@ -56,13 +55,6 @@ export class BodySchemaParser {
       }
     }
 
-    if (!content) {
-      const msg =
-        contentType.contentType === 'not_provided'
-          ? 'media type not specified'
-          : `unsupported media type ${contentType.contentType}`;
-      throw new UnsupportedMediaType({ path: path, message: msg });
-    }
-    return content.schema ?? {};
+    return content?.schema ?? {};
   }
 }

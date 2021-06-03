@@ -527,90 +527,6 @@ export class HttpError extends Error implements ValidationError {
       },
     ];
   }
-
-  public static create(err: {
-    status: number;
-    path: string;
-    message?: string;
-    errors?: ValidationErrorItem[];
-  }):
-    | InternalServerError
-    | UnsupportedMediaType
-    | RequestEntityTooLarge
-    | BadRequest
-    | MethodNotAllowed
-    | NotAcceptable
-    | NotFound
-    | Unauthorized
-    | Forbidden {
-    switch (err.status) {
-      case 400:
-        return new BadRequest(err);
-      case 401:
-        return new Unauthorized(err);
-      case 403:
-        return new Forbidden(err);
-      case 404:
-        return new NotFound(err);
-      case 405:
-        return new MethodNotAllowed(err);
-      case 406:
-        return new NotAcceptable(err);
-      case 413:
-        return new RequestEntityTooLarge(err);
-      case 415:
-        return new UnsupportedMediaType(err);
-      default:
-        return new InternalServerError(err);
-    }
-  }
-}
-
-export class NotFound extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 404,
-      path: err.path,
-      message: err.message,
-      name: 'Not Found',
-    });
-  }
-}
-
-export class NotAcceptable extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 406,
-      path: err.path,
-      name: 'Not Acceptable',
-      message: err.message,
-    });
-  }
-}
-
-export class MethodNotAllowed extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    headers?: ErrorHeaders;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 405,
-      path: err.path,
-      name: 'Method Not Allowed',
-      message: err.message,
-      headers: err.headers,
-    });
-  }
 }
 
 export class BadRequest extends HttpError {
@@ -630,38 +546,6 @@ export class BadRequest extends HttpError {
   }
 }
 
-export class RequestEntityTooLarge extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 413,
-      path: err.path,
-      name: 'Request Entity Too Large',
-      message: err.message,
-    });
-  }
-}
-
-export class InternalServerError extends HttpError {
-  constructor(err: {
-    path?: string;
-    message?: string;
-    overrideStatus?: number;
-    errors?: ValidationErrorItem[];
-  }) {
-    super({
-      status: err.overrideStatus || 500,
-      path: err.path,
-      name: 'Internal Server Error',
-      message: err.message,
-      errors: err.errors,
-    });
-  }
-}
-
 export class UnsupportedMediaType extends HttpError {
   constructor(err: {
     path: string;
@@ -672,36 +556,6 @@ export class UnsupportedMediaType extends HttpError {
       status: err.overrideStatus || 415,
       path: err.path,
       name: 'Unsupported Media Type',
-      message: err.message,
-    });
-  }
-}
-
-export class Unauthorized extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 401,
-      path: err.path,
-      name: 'Unauthorized',
-      message: err.message,
-    });
-  }
-}
-
-export class Forbidden extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 403,
-      path: err.path,
-      name: 'Forbidden',
       message: err.message,
     });
   }

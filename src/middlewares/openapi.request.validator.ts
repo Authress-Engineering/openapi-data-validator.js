@@ -10,7 +10,6 @@ import {
   OpenApiRequest,
   RequestValidatorOptions,
   ValidateRequestOpts,
-  NotFound,
   BadRequest,
   ParametersSchema,
   BodySchema,
