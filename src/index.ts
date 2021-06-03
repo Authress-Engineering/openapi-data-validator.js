@@ -33,13 +33,6 @@ export * as serdes from './framework/base.serdes';
 
 function openapiValidator(options: OpenApiValidatorOpts) {
   const oav = new OpenApiValidator(options);
-  exports.middleware._oav = oav;
-
-  return oav.installMiddleware(
-    new OpenApiSpecLoader({
-      apiDoc: cloneDeep(options.apiSpec),
-      validateApiSpec: options.validateApiSpec,
-      $refParser: options.$refParser,
-    }).load(),
-  );
+  const specAsync = new OpenApiSpecLoader({ apiDoc: cloneDeep(options.apiSpec), validateApiSpec: options.validateApiSpec }).load();
+  return oav.createValidator(specAsync);
 }

@@ -6,8 +6,7 @@ import { createRequestAjv } from '../../framework/ajv';
 import {
   OpenAPIV3,
   SerDesMap,
-  Options,
-  ValidateResponseOpts,
+  Options
 } from '../../framework/types';
 
 interface TraversalStates {
@@ -74,26 +73,19 @@ export const httpMethods = new Set([
 export class SchemaPreprocessor {
   private ajv: Ajv;
   private apiDoc: OpenAPIV3.Document;
-  private apiDocRes: OpenAPIV3.Document;
   private serDesMap: SerDesMap;
-  private responseOpts: ValidateResponseOpts;
   constructor(
     apiDoc: OpenAPIV3.Document,
-    ajvOptions: Options,
-    validateResponsesOpts: ValidateResponseOpts,
+    ajvOptions: Options
   ) {
     this.ajv = createRequestAjv(apiDoc, ajvOptions);
     this.apiDoc = apiDoc;
     this.serDesMap = ajvOptions.serDesMap;
-    this.responseOpts = validateResponsesOpts;
   }
 
   public preProcess() {
     const componentSchemas = this.gatherComponentSchemaNodes();
     const r = this.gatherSchemaNodesFromPaths();
-
-    // Now that we've processed paths, clone a response spec if we are validating responses
-    this.apiDocRes = !!this.responseOpts ? cloneDeep(this.apiDoc) : null;
 
     const schemaNodes = {
       schemas: componentSchemas,
@@ -107,8 +99,7 @@ export class SchemaPreprocessor {
     );
 
     return {
-      apiDoc: this.apiDoc,
-      apiDocRes: this.apiDocRes,
+      apiDoc: this.apiDoc
     };
   }
 
@@ -233,13 +224,6 @@ export class SchemaPreprocessor {
   ) {
     const pschemas = [parent?.schema];
     const nschemas = [node.schema];
-
-    if (this.apiDocRes) {
-      const p = _get(this.apiDocRes, parent?.path);
-      const n = _get(this.apiDocRes, node?.path);
-      pschemas.push(p);
-      nschemas.push(n);
-    }
 
     // visit the node in both the request and response schema
     for (let i = 0; i < nschemas.length; i++) {

@@ -10,12 +10,12 @@ import {
   OpenApiRequest,
   RequestValidatorOptions,
   ValidateRequestOpts,
-  OpenApiRequestMetadata,
   NotFound,
   BadRequest,
   ParametersSchema,
   BodySchema,
   ValidationSchema,
+  OpenApiRequestHandler,
 } from '../framework/types';
 import { BodySchemaParser } from './parsers/body.parse';
 import { ParametersSchemaParser } from './parsers/schema.parse';
@@ -29,7 +29,7 @@ type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject;
 type ApiKeySecurityScheme = OpenAPIV3.ApiKeySecurityScheme;
 
 export class RequestValidator {
-  private middlewareCache: { [key: string]: RequestHandler } = {};
+  private middlewareCache: { [key: string]: OpenApiRequestHandler } = {};
   private apiDoc: OpenAPIV3.Document;
   private ajv: Ajv;
   private ajvBody: Ajv;
@@ -43,43 +43,35 @@ export class RequestValidator {
     this.apiDoc = apiDoc;
     this.requestOpts.allowUnknownQueryParameters =
       options.allowUnknownQueryParameters;
-    this.ajv = createRequestAjv(apiDoc, { ...options, coerceTypes: true });
+    this.ajv = createRequestAjv(apiDoc, options);
     this.ajvBody = createRequestAjv(apiDoc, options);
   }
 
-  public validate(
-    req: OpenApiRequest,
-    res: Response,
-    next: NextFunction,
-  ): void {
-    if (!req.openapi) {
-      // this path was not found in open api and
-      // this path is not defined under an openapi base path
-      // skip it
-      return next();
+  public validate(req: OpenApiRequest): void {
+    const route = req.route;
+    const reqSchema = this.apiDoc.paths[route] && this.apiDoc.paths[route][req.method.toLowerCase()];
+    if (!reqSchema) {
+      return;
     }
-
-    const openapi = <OpenApiRequestMetadata>req.openapi;
-    const path = openapi.expressRoute;
-    const reqSchema = openapi.schema;
     // cache middleware by combining method, path, and contentType
     const contentType = ContentType.from(req);
     const contentTypeKey = contentType.equivalents()[0] ?? 'not_provided';
     // use openapi.expressRoute as path portion of key
-    const key = `${req.method}-${path}-${contentTypeKey}`;
+    const key = `${req.method}-${route}-${contentTypeKey}`;
 
     if (!this.middlewareCache[key]) {
-      const middleware = this.buildMiddleware(path, reqSchema, contentType);
+      const middleware = this.buildMiddleware(route, reqSchema, contentType);
       this.middlewareCache[key] = middleware;
     }
-    return this.middlewareCache[key](req, res, next);
+    
+    this.middlewareCache[key](req);
   }
 
   private buildMiddleware(
     path: string,
     reqSchema: OperationObject,
     contentType: ContentType,
-  ): RequestHandler {
+  ): OpenApiRequestHandler {
     const apiDoc = this.apiDoc;
     const schemaParser = new ParametersSchemaParser(this.ajv, apiDoc);
     const parameters = schemaParser.parse(path, reqSchema.parameters);
@@ -95,27 +87,7 @@ export class RequestValidator {
       this.requestOpts.allowUnknownQueryParameters
     );
 
-    return (req: OpenApiRequest, res: Response, next: NextFunction): void => {
-      const openapi = <OpenApiRequestMetadata>req.openapi;
-      const pathParams = Object.keys(openapi.pathParams);
-      const hasPathParams = pathParams.length > 0;
-
-      if (hasPathParams) {
-        // handle wildcard path param syntax
-        if (openapi.expressRoute.endsWith('*')) {
-          // if we have an express route /data/:p*, we require a path param, p
-          // if the p param is empty, the user called /p which is not found
-          // if it was found, it would match a different route
-          if (pathParams.filter((p) => openapi.pathParams[p]).length === 0) {
-            throw new NotFound({
-              path: req.path,
-              message: 'not found',
-            });
-          }
-        }
-        req.params = openapi.pathParams ?? req.params;
-      }
-
+    return (req: OpenApiRequest): void => {
       const schemaProperties = validator.allSchemaProperties;
       const mutator = new RequestParameterMutator(
         this.ajv,
@@ -124,7 +96,7 @@ export class RequestValidator {
         schemaProperties,
       );
 
-      mutator.modifyRequest(req);
+      mutator.modifyRequest(req, reqSchema);
 
       if (!allowUnknownQueryParameters) {
         this.processQueryParam(
@@ -162,23 +134,22 @@ export class RequestValidator {
       );
 
       if (valid && validBody) {
-        next();
-      } else {
-        const errors = augmentAjvErrors(
-          []
-            .concat(validator.validatorGeneral.errors ?? [])
-            .concat(validatorBody.errors ?? []),
-        );
-        const err = ajvErrorsToValidatorError(400, errors);
-        const message = this.ajv.errorsText(errors, { dataVar: 'request' });
-        const error: BadRequest = new BadRequest({
-          path: req.path,
-          message: message,
-        });
-        error.errors = err.errors;
-        throw error;
+        return;
       }
-    };
+      const errors = augmentAjvErrors(
+        []
+          .concat(validator.validatorGeneral.errors ?? [])
+          .concat(validatorBody.errors ?? []),
+      );
+      const err = ajvErrorsToValidatorError(400, errors);
+      const message = this.ajv.errorsText(errors, { dataVar: 'request' });
+      const error: BadRequest = new BadRequest({
+        path: req.route,
+        message: message,
+      });
+      error.errors = err.errors;
+      throw error;
+    }
   }
 
   private discriminatorValidator(req, discriminator) {
@@ -189,7 +160,7 @@ export class RequestValidator {
         return validators[discriminatorValue];
       } else {
         throw new BadRequest({
-          path: req.path,
+          path: req.route,
           message: `'${property}' should be equal to one of the allowed values: ${options
             .map((o) => o.option)
             .join(', ')}.`,

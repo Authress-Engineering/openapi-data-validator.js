@@ -1,5 +1,5 @@
 import * as Ajv from 'ajv';
-import { ValidationError } from '../framework/types';
+import { OpenApiRequest, ValidationError } from '../framework/types';
 
 export class ContentType {
   public readonly contentType: string = null;
@@ -19,7 +19,7 @@ export class ContentType {
       }
     }
   }
-  public static from(req: Request): ContentType {
+  public static from(req: OpenApiRequest): ContentType {
     return new ContentType(req.headers['content-type']);
   }
 

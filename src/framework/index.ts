@@ -22,7 +22,7 @@ export class OpenAPIFramework {
     visitor: OpenAPIFrameworkVisitor,
   ): Promise<OpenAPIFrameworkInit> {
     const args = this.args;
-    const apiDoc = await this.loadSpec(args.apiDoc, args.$refParser);
+    const apiDoc = await this.loadSpec(args.apiDoc);
 
     const basePathObs = this.getBasePathsFromServers(apiDoc.servers);
     const basePaths = Array.from(
@@ -74,27 +74,20 @@ export class OpenAPIFramework {
 
   private loadSpec(
     filePath: string | object,
-    $refParser: { mode: 'bundle' | 'dereference' } = { mode: 'bundle' },
   ): Promise<OpenAPIV3.Document> {
-    // Because of this issue ( https://github.com/APIDevTools/json-schema-ref-parser/issues/101#issuecomment-421755168 )
-    // We need this workaround ( use '$RefParser.dereference' instead of '$RefParser.bundle' ) if asked by user
     if (typeof filePath === 'string') {
       const origCwd = process.cwd();
       const absolutePath = path.resolve(origCwd, filePath);
       if (fs.existsSync(absolutePath)) {
         // Get document, or throw exception on error
-        return $refParser.mode === 'dereference'
-          ? $RefParser.dereference(absolutePath)
-          : $RefParser.bundle(absolutePath);
+        return $RefParser.dereference(absolutePath);
       } else {
         throw new Error(
           `${this.loggingPrefix}spec could not be read at ${filePath}`,
         );
       }
     }
-    return $refParser.mode === 'dereference'
-      ? $RefParser.dereference(filePath)
-      : $RefParser.bundle(filePath);
+    return $RefParser.dereference(filePath);
   }
 
   private sortApiDocTags(apiDoc: OpenAPIV3.Document): void {

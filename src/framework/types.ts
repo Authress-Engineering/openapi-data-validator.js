@@ -1,5 +1,4 @@
 import * as ajv from 'ajv';
-import * as multer from 'multer';
 export { OpenAPIFrameworkArgs };
 
 export type BodySchema =
@@ -30,11 +29,6 @@ export type SecurityHandlers = {
   ) => boolean | Promise<boolean>;
 };
 
-export interface MultipartOpts {
-  multerOpts: boolean | multer.Options;
-  ajvOpts: Options;
-}
-
 export interface Options extends ajv.Options {
   // Specific options
   serDesMap?: SerDesMap;
@@ -44,23 +38,7 @@ export interface RequestValidatorOptions extends Options, ValidateRequestOpts {}
 
 export type ValidateRequestOpts = {
   allowUnknownQueryParameters?: boolean;
-  coerceTypes?: boolean | 'array';
   removeAdditional?: boolean | 'all' | 'failing';
-};
-
-export type ValidateResponseOpts = {
-  removeAdditional?: boolean | 'all' | 'failing';
-  coerceTypes?: boolean | 'array';
-  onError?: (err: InternalServerError, json: any, req: Request) => void;
-};
-
-export type ValidateSecurityOpts = {
-  handlers?: SecurityHandlers;
-};
-
-export type OperationHandlerOptions = {
-  basePath: string;
-  resolver: Function;
 };
 
 export type Format = {
@@ -108,21 +86,11 @@ export type SerDesMap = {
 export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
   validateApiSpec?: boolean;
-  validateResponses?: boolean | ValidateResponseOpts;
   validateRequests?: boolean | ValidateRequestOpts;
-  validateSecurity?: boolean | ValidateSecurityOpts;
   ignorePaths?: RegExp | Function;
-  securityHandlers?: SecurityHandlers;
-  coerceTypes?: boolean | 'array';
   unknownFormats?: true | string[] | 'ignore';
   serDes?: SerDes[];
   formats?: Format[];
-  fileUploader?: boolean | multer.Options;
-  multerOpts?: multer.Options;
-  $refParser?: {
-    mode: 'bundle' | 'dereference';
-  };
-  operationHandlers?: false | string | OperationHandlerOptions;
   validateFormats?: false | 'fast' | 'full';
 }
 
@@ -446,9 +414,6 @@ export interface OpenAPIFrameworkPathObject {
 interface OpenAPIFrameworkArgs {
   apiDoc: OpenAPIV3.Document | string;
   validateApiSpec?: boolean;
-  $refParser?: {
-    mode: 'bundle' | 'dereference';
-  };
 }
 
 export interface OpenAPIFrameworkAPIContext {
@@ -461,22 +426,20 @@ export interface OpenAPIFrameworkVisitor {
   visitApi?(context: OpenAPIFrameworkAPIContext): void;
 }
 
-export interface OpenApiRequestMetadata {
-  expressRoute: string;
-  openApiRoute: string;
-  pathParams: { [index: string]: string };
-  schema: OpenAPIV3.OperationObject;
-}
-
-export interface OpenApiRequest extends Request {
-  openapi?: OpenApiRequestMetadata;
+export interface OpenApiRequest {
+  route: string,
+  method: string,
+  query?: Record<string, string>,
+  headers?: Record<string, string>,
+  body?: string,
+  signedCookies?: Record<string, string>,
+  cookies?: Record<string, string>,
+  params?: Record<string, unknown>
 }
 
 export type OpenApiRequestHandler = (
-  req: OpenApiRequest,
-  res: Response,
-  next: NextFunction,
-) => any;
+  req: OpenApiRequest
+) => void;
 
 export interface IJsonSchema {
   id?: string;
@@ -489,7 +452,7 @@ export interface IJsonSchema {
   minimum?: number;
   exclusiveMinimum?: boolean;
   maxLength?: number;
-  minLength?: number;
+  minLength?: number;met
   pattern?: string;
   additionalItems?: boolean | IJsonSchema;
   items?: IJsonSchema | IJsonSchema[];

@@ -2,7 +2,6 @@ import { Ajv } from 'ajv';
 import {
   OpenAPIV3,
   OpenApiRequest,
-  OpenApiRequestMetadata,
   ValidationSchema,
   BadRequest,
 } from '../../framework/types';
@@ -60,11 +59,8 @@ export class RequestParameterMutator {
    * req values may be parsed/mutated as a JSON object, JSON Exploded Object, JSON Array, or JSON Exploded Array
    * @param req
    */
-  public modifyRequest(req: OpenApiRequest): void {
-    const { parameters } = (<OpenApiRequestMetadata>req.openapi).schema;
-    const rawQuery = this.parseQueryStringUndecoded(
-      url.parse(req.originalUrl).query,
-    );
+  public modifyRequest(req: OpenApiRequest, schema: OpenAPIV3.OperationObject): void {
+    const { parameters } = schema;
 
     (parameters || []).forEach((p) => {
       const parameter = dereferenceParameter(this._apiDocs, p);
@@ -72,12 +68,6 @@ export class RequestParameterMutator {
 
       const { type } = <SchemaObject>schema;
       const { style, explode } = parameter;
-      const i = req.originalUrl.indexOf('?');
-      const queryString = req.originalUrl.substr(i + 1);
-
-      if (parameter.in === 'query' && !parameter.allowReserved) {
-        this.validateReservedCharacters(name, rawQuery);
-      }
 
       if (parameter.content) {
         this.handleContent(req, name, parameter);
@@ -86,7 +76,7 @@ export class RequestParameterMutator {
           this.parseJsonAndMutateRequest(req, parameter.in, name);
           this.handleFormExplode(req, name, <SchemaObject>schema, parameter);
         } else if (style === 'deepObject') {
-          this.handleDeepObject(req, queryString, name, schema);
+          this.handleDeepObject(req, name, schema);
         } else {
           this.parseJsonAndMutateRequest(req, parameter.in, name);
         }
@@ -103,8 +93,7 @@ export class RequestParameterMutator {
   }
 
   private handleDeepObject(
-    req: Request,
-    qs: string,
+    req: OpenApiRequest,
     name: string,
     schema: SchemaObject,
   ): void {
@@ -152,7 +141,7 @@ export class RequestParameterMutator {
   }
 
   private handleContent(
-    req: Request,
+    req: OpenApiRequest,
     name: string,
     parameter: ParameterObject,
   ): void {
@@ -175,7 +164,7 @@ export class RequestParameterMutator {
   }
 
   private handleFormExplode(
-    req: Request,
+    req: OpenApiRequest,
     name: string,
     schema: SchemaObject,
     parameter: ParameterObject,
@@ -216,7 +205,7 @@ export class RequestParameterMutator {
   }
 
   private parseJsonAndMutateRequest(
-    req: Request,
+    req: OpenApiRequest,
     $in: string,
     name: string,
   ): void {
@@ -240,7 +229,7 @@ export class RequestParameterMutator {
   }
 
   private parseJsonArrayAndMutateRequest(
-    req: Request,
+    req: OpenApiRequest,
     $in: string,
     name: string,
     delimiter: string,
@@ -260,7 +249,7 @@ export class RequestParameterMutator {
   }
 
   private explodedJsonObjectAndMutateRequest(
-    req: Request,
+    req: OpenApiRequest,
     $in: string,
     name: string,
     properties: string[],
@@ -290,7 +279,7 @@ export class RequestParameterMutator {
   }
 
   private explodeJsonArrayAndMutateRequest(
-    req: Request,
+    req: OpenApiRequest,
     $in: string,
     name: string,
   ): void {
@@ -328,30 +317,5 @@ export class RequestParameterMutator {
         message: message,
       });
     }
-  }
-
-  private validateReservedCharacters(
-    name: string,
-    pairs: { [key: string]: string[] },
-  ) {
-    const vs = pairs[name];
-    if (!vs) return;
-    for (const v of vs) {
-      if (v?.match(RESERVED_CHARS)) {
-        const message = `Parameter '${name}' must be url encoded. Its value may not contain reserved characters.`;
-        throw new BadRequest({ path: `.query.${name}`, message: message });
-      }
-    }
-  }
-
-  private parseQueryStringUndecoded(qs: string) {
-    if (!qs) return {};
-    const q = qs.replace('?', '');
-    return q.split('&').reduce((m, p) => {
-      const [k, v] = p.split('=');
-      m[k] = m[k] ?? [];
-      m[k].push(v);
-      return m;
-    }, {});
   }
 }

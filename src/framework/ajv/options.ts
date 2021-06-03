@@ -3,8 +3,7 @@ import {
   OpenApiValidatorOpts,
   Options,
   RequestValidatorOptions,
-  ValidateRequestOpts,
-  ValidateResponseOpts,
+  ValidateRequestOpts
 } from '../types';
 
 export class AjvOptions {
@@ -16,37 +15,19 @@ export class AjvOptions {
     return this.baseOptions();
   }
 
-  get response(): ajv.Options {
-    const { coerceTypes, removeAdditional } = <ValidateResponseOpts>(
-      this.options.validateResponses
-    );
-    return {
-      ...this.baseOptions(),
-      useDefaults: false,
-      coerceTypes,
-      removeAdditional,
-    };
-  }
-
   get request(): RequestValidatorOptions {
-    const { allowUnknownQueryParameters, coerceTypes, removeAdditional } = <
+    const { allowUnknownQueryParameters, removeAdditional } = <
       ValidateRequestOpts
     >this.options.validateRequests;
     return {
       ...this.baseOptions(),
       allowUnknownQueryParameters,
-      coerceTypes,
       removeAdditional,
     };
   }
 
-  get multipart(): Options {
-    return this.baseOptions();
-  }
-
   private baseOptions(): Options {
     const {
-      coerceTypes,
       unknownFormats,
       validateFormats,
       serDes,
@@ -66,9 +47,8 @@ export class AjvOptions {
     }
 
     return {
-      validateSchema: false, // this is true for statup validation, thus it can be bypassed here
+      validateSchema: false,
       nullable: true,
-      coerceTypes,
       useDefaults: true,
       removeAdditional: false,
       unknownFormats,

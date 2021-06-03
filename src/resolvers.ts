@@ -7,7 +7,7 @@ export function defaultResolver(
   handlersPath: string,
   route: RouteMetadata,
   apiDoc: OpenAPIV3.Document,
-): RequestHandler {
+): unknown {
   const tmpModules = {};
   const { basePath, expressRoute, openApiRoute, method } = route;
   const pathKey = openApiRoute.substring(basePath.length);
@@ -53,7 +53,7 @@ export function modulePathResolver(
   handlersPath: string,
   route: RouteMetadata,
   apiDoc: OpenAPIV3.Document,
-): RequestHandler {
+): unknown {
   const pathKey = route.openApiRoute.substring(route.basePath.length);
   const schema = apiDoc.paths[pathKey][route.method.toLowerCase()];
   const [controller, method] = schema['operationId'].split('.');

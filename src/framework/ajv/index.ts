@@ -25,6 +25,7 @@ function createAjv(
 ): Ajv.Ajv {
   const ajv = new Ajv({
     ...options,
+    coerceTypes: true,
     schemaId: 'auto',
     allErrors: true,
     meta: draftSchema,
