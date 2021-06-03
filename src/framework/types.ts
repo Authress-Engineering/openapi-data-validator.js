@@ -250,7 +250,7 @@ export namespace OpenAPIV3 {
     example?: any;
     deprecated?: boolean;
 
-    // Express-openapi-validator specific properties
+    // Library internal properties
     componentId?: string;
   }
 

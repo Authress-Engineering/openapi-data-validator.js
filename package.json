@@ -1,5 +1,5 @@
 {
-  "name": "openapi-validator",
+  "name": "openapi-model-validator",
   "version": "0.0.0",
   "description": "Automatically validate API requests and responses with OpenAPI 3.",
   "main": "dist/index.js",
@@ -11,7 +11,7 @@
     "build": "rm -rf dist/ && tsc"
   },
   "repository": {
-    "url": "https://github.com/rhosys/openapi-validator"
+    "url": "https://github.com/rhosys/openapi-model-validator.js"
   },
   "keywords": [
     "swagger",
