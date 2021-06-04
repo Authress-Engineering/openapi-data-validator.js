@@ -1,5 +1,4 @@
-import { Ajv } from 'ajv';
-import ajv = require('ajv');
+import Ajv from 'ajv';
 import * as cloneDeep from 'lodash.clonedeep';
 import * as _get from 'lodash.get';
 import { createRequestAjv } from '../../framework/ajv';
@@ -15,7 +14,6 @@ interface TraversalStates {
 }
 
 interface TraversalState {
-  discriminator: object;
   kind: 'req' | 'res';
   path: string[];
 }
@@ -52,14 +50,6 @@ type SchemaObject = OpenAPIV3.SchemaObject;
 type ReferenceObject = OpenAPIV3.ReferenceObject;
 type Schema = ReferenceObject | SchemaObject;
 
-if (!Array.prototype['flatMap']) {
-  // polyfill flatMap
-  // TODO remove me when dropping node 10 support
-  Array.prototype['flatMap'] = function (lambda) {
-    return Array.prototype.concat.apply([], this.map(lambda));
-  };
-  Object.defineProperty(Array.prototype, 'flatMap', { enumerable: false });
-}
 export const httpMethods = new Set([
   'get',
   'put',
@@ -200,8 +190,8 @@ export class SchemaPreprocessor {
     };
 
     const initOpts = (): TraversalStates => ({
-      req: { discriminator: {}, kind: 'req', path: [] },
-      res: { discriminator: {}, kind: 'res', path: [] },
+      req: { kind: 'req', path: [] },
+      res: { kind: 'res', path: [] },
     });
 
     for (const node of nodes.schemas) {
@@ -237,92 +227,7 @@ export class SchemaPreprocessor {
         // This null check should no longer be necessary
         this.handleSerDes(pschema, nschema, options);
         this.handleReadonly(pschema, nschema, options);
-        this.processDiscriminator(pschema, nschema, options);
       }
-    }
-  }
-
-  private processDiscriminator(parent: Schema, schema: Schema, opts: any = {}) {
-    const o = opts.discriminator;
-    const schemaObj = <SchemaObject>schema;
-    const xOf = schemaObj.oneOf ? 'oneOf' : schemaObj.anyOf ? 'anyOf' : null;
-
-    if (xOf && schemaObj?.discriminator?.propertyName && !o.discriminator) {
-      const options = schemaObj[xOf].flatMap((refObject) => {
-        if (refObject['$ref'] === undefined) {
-          return [];
-        }
-        const keys = this.findKeys(
-          schemaObj.discriminator.mapping,
-          (value) => value === refObject['$ref'],
-        );
-        const ref = this.getKeyFromRef(refObject['$ref']);
-        return keys.length > 0
-          ? keys.map((option) => ({ option, ref }))
-          : [{ option: ref, ref }];
-      });
-      o.options = options;
-      o.discriminator = schemaObj.discriminator?.propertyName;
-      o.properties = {
-        ...(o.properties ?? {}),
-        ...(schemaObj.properties ?? {}),
-      };
-      o.required = Array.from(
-        new Set((o.required ?? []).concat(schemaObj.required ?? [])),
-      );
-    }
-
-    if (xOf) return;
-
-    if (o.discriminator) {
-      o.properties = {
-        ...(o.properties ?? {}),
-        ...(schemaObj.properties ?? {}),
-      };
-      o.required = Array.from(
-        new Set((o.required ?? []).concat(schemaObj.required ?? [])),
-      );
-
-      const ancestor: any = parent;
-      const ref = opts.originalSchema.$ref;
-
-      if (!ref) return;
-
-      const options = this.findKeys(
-        ancestor.discriminator?.mapping,
-        (value) => value === ref,
-      );
-      const refName = this.getKeyFromRef(ref);
-      if (options.length === 0 && ref) {
-        options.push(refName);
-      }
-
-      if (options.length > 0) {
-        const newSchema = JSON.parse(JSON.stringify(schemaObj));
-        newSchema.properties = {
-          ...(o.properties ?? {}),
-          ...(newSchema.properties ?? {}),
-        };
-        newSchema.required = o.required;
-        if (newSchema.required.length === 0) {
-          delete newSchema.required;
-        }
-
-        ancestor._discriminator ??= {
-          validators: {},
-          options: o.options,
-          property: o.discriminator,
-        };
-
-        for (const option of options) {
-          ancestor._discriminator.validators[option] = this.ajv.compile(
-            newSchema,
-          );
-        }
-      }
-      //reset data
-      o.properties = {};
-      delete o.required;
     }
   }
 
@@ -337,7 +242,7 @@ export class SchemaPreprocessor {
       this.serDesMap[schema.format]
     ) {
       (<any>schema).type = ['object', 'string'];
-      schema['x-eov-serdes'] = this.serDesMap[schema.format];
+      // schema['x-eov-serdes'] = this.serDesMap[schema.format];
     }
   }
 

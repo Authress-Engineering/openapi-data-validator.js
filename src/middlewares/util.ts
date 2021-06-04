@@ -1,4 +1,4 @@
-import * as Ajv from 'ajv';
+import { ErrorObject } from 'ajv';
 import { OpenApiRequest, ValidationError } from '../framework/types';
 
 export class ContentType {
@@ -38,8 +38,8 @@ export class ContentType {
  * @param errors
  */
 export function augmentAjvErrors(
-  errors: Ajv.ErrorObject[] = [],
-): Ajv.ErrorObject[] {
+  errors: ErrorObject[] = [],
+): ErrorObject[] {
   errors.forEach((e) => {
     if (e.keyword === 'enum') {
       const params: any = e.params;
@@ -53,18 +53,18 @@ export function augmentAjvErrors(
 }
 export function ajvErrorsToValidatorError(
   status: number,
-  errors: Ajv.ErrorObject[],
+  errors: ErrorObject[],
 ): ValidationError {
   return {
     status,
     errors: errors.map((e) => {
       const params: any = e.params;
       const required =
-        params?.missingProperty && e.dataPath + '.' + params.missingProperty;
+        params?.missingProperty && e.instancePath + '.' + params.missingProperty;
       const additionalProperty =
         params?.additionalProperty &&
-        e.dataPath + '.' + params.additionalProperty;
-      const path = required ?? additionalProperty ?? e.dataPath ?? e.schemaPath;
+        e.instancePath + '.' + params.additionalProperty;
+      const path = required ?? additionalProperty ?? e.instancePath ?? e.schemaPath;
       return {
         path,
         message: e.message,

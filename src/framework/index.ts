@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as $RefParser from '@apidevtools/json-schema-ref-parser';
-import { OpenAPISchemaValidator } from './openapi.schema.validator';
 import { BasePath } from './base.path';
 import {
   OpenAPIFrameworkArgs,
@@ -31,14 +30,14 @@ export class OpenAPIFramework {
         return acc;
       }, new Set<string>()),
     );
-    const validateApiSpec =
-      'validateApiSpec' in args ? !!args.validateApiSpec : true;
-    const validator = new OpenAPISchemaValidator({
-      version: apiDoc.openapi,
-      validateApiSpec
-    });
 
-    if (validateApiSpec) {
+    // args.validateApiSpec = true;
+    if (args.validateApiSpec) {
+      const { OpenAPISchemaValidator } = require('./openapi.schema.validator');
+      const validator = new OpenAPISchemaValidator({
+        version: apiDoc.openapi,
+        validateApiSpec: args.validateApiSpec
+      });
       const apiDocValidation = validator.validate(apiDoc);
 
       if (apiDocValidation.errors.length) {

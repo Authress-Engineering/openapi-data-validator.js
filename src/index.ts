@@ -28,8 +28,6 @@ export class OpenApiValidator {
     this.normalizeOptions(options);
 
     if (options.validateRequests == null) options.validateRequests = true;
-    if (options.unknownFormats == null) options.unknownFormats === true;
-    if (options.validateFormats == null) options.validateFormats = 'fast';
     if (options.formats == null) options.formats = [];
 
     if (options.validateRequests === true) {
@@ -62,39 +60,12 @@ export class OpenApiValidator {
 
   private validateOptions(options: OpenApiValidatorOpts): void {
     if (!options.apiSpec) throw ono('apiSpec required');
-
-    const unknownFormats = options.unknownFormats;
-    if (typeof unknownFormats === 'boolean') {
-      if (!unknownFormats) {
-        throw ono(
-          "unknownFormats must contain an array of unknownFormats, 'ignore' or true",
-        );
-      }
-    } else if (
-      typeof unknownFormats === 'string' &&
-      unknownFormats !== 'ignore' &&
-      !Array.isArray(unknownFormats)
-    )
-      throw ono(
-        "unknownFormats must contain an array of unknownFormats, 'ignore' or true",
-      );
   }
 
   private normalizeOptions(options: OpenApiValidatorOpts): void {
     if (!options.serDes) {
       options.serDes = defaultSerDes;
     } else {
-      if (!Array.isArray(options.unknownFormats)) {
-        options.unknownFormats = Array<string>();
-      }
-      options.serDes.forEach((currentSerDes) => {
-        if (
-          (options.unknownFormats as string[]).indexOf(currentSerDes.format) ===
-          -1
-        ) {
-          (options.unknownFormats as string[]).push(currentSerDes.format);
-        }
-      });
       defaultSerDes.forEach((currentDefaultSerDes) => {
         let defaultSerDesOverride = options.serDes.find(
           (currentOptionSerDes) => {

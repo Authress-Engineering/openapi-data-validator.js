@@ -1,4 +1,4 @@
-import ajv = require('ajv');
+import { Options as AjvSdkOptions } from 'ajv';
 import {
   OpenApiValidatorOpts,
   Options,
@@ -11,7 +11,7 @@ export class AjvOptions {
   constructor(options: OpenApiValidatorOpts) {
     this.options = options;
   }
-  get preprocessor(): ajv.Options {
+  get preprocessor(): AjvSdkOptions {
     return this.baseOptions();
   }
 
@@ -28,8 +28,6 @@ export class AjvOptions {
 
   private baseOptions(): Options {
     const {
-      unknownFormats,
-      validateFormats,
       serDes,
     } = this.options;
     const serDesMap = {};
@@ -48,11 +46,9 @@ export class AjvOptions {
 
     return {
       validateSchema: false,
-      nullable: true,
       useDefaults: true,
       removeAdditional: false,
-      unknownFormats,
-      format: validateFormats,
+      validateFormats: false,
       formats: this.options.formats.reduce((acc, f) => {
         acc[f.name] = {
           type: f.type,

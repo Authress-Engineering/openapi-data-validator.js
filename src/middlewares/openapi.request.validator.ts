@@ -1,4 +1,4 @@
-import { Ajv, ValidateFunction } from 'ajv';
+import Ajv, { ValidateFunction } from 'ajv';
 import { createRequestAjv } from '../framework/ajv';
 import {
   ContentType,
@@ -23,7 +23,6 @@ import { RequestParameterMutator } from './parsers/req.parameter.mutator';
 type OperationObject = OpenAPIV3.OperationObject;
 type SchemaObject = OpenAPIV3.SchemaObject;
 type ReferenceObject = OpenAPIV3.ReferenceObject;
-type SecurityRequirementObject = OpenAPIV3.SecurityRequirementObject;
 type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject;
 type ApiKeySecurityScheme = OpenAPIV3.ApiKeySecurityScheme;
 
@@ -74,7 +73,6 @@ export class RequestValidator {
     const apiDoc = this.apiDoc;
     const schemaParser = new ParametersSchemaParser(this.ajv, apiDoc);
     const parameters = schemaParser.parse(path, reqSchema.parameters);
-    const securityQueryParam = Security.queryParam(apiDoc, reqSchema);
     const body = new BodySchemaParser().parse(path, reqSchema, contentType);
     const validator = new Validator(this.apiDoc, parameters, body, {
       general: this.ajv,
@@ -98,11 +96,7 @@ export class RequestValidator {
       mutator.modifyRequest(req, reqSchema);
 
       if (!allowUnknownQueryParameters) {
-        this.processQueryParam(
-          req.query,
-          schemaProperties.query,
-          securityQueryParam,
-        );
+        this.processQueryParam(req.query, schemaProperties.query);
       }
 
       const cookies = req.cookies
@@ -119,18 +113,9 @@ export class RequestValidator {
         cookies,
         body: req.body,
       };
-      const schemaBody = <any>validator?.schemaBody;
-      const discriminator = schemaBody?.properties?.body?._discriminator;
-      const discriminatorValidator = this.discriminatorValidator(
-        req,
-        discriminator,
-      );
-
-      const validatorBody = discriminatorValidator ?? validator.validatorBody;
+      const validatorBody = validator.validatorBody;
       const valid = validator.validatorGeneral(data);
-      const validBody = validatorBody(
-        discriminatorValidator ? data.body : data,
-      );
+      const validBody = validatorBody(data);
 
       if (valid && validBody) {
         return;
@@ -151,24 +136,7 @@ export class RequestValidator {
     }
   }
 
-  private discriminatorValidator(req, discriminator) {
-    if (discriminator) {
-      const { options, property, validators } = discriminator;
-      const discriminatorValue = req.body[property]; // TODO may not always be in this position
-      if (options.find((o) => o.option === discriminatorValue)) {
-        return validators[discriminatorValue];
-      } else {
-        throw new BadRequest({
-          path: req.route,
-          message: `'${property}' should be equal to one of the allowed values: ${options
-            .map((o) => o.option)
-            .join(', ')}.`,
-        });
-      }
-    }
-    return null;
-  }
-  private processQueryParam(query: object, schema, whiteList: string[] = []) {
+  private processQueryParam(query: object, schema) {
     const entries = Object.entries(schema.properties ?? {});
     let keys = [];
     for (const [key, prop] of entries) {
@@ -179,7 +147,6 @@ export class RequestValidator {
       keys.push(key);
     }
     const knownQueryParams = new Set(keys);
-    whiteList.forEach((item) => knownQueryParams.add(item));
     const queryParams = Object.keys(query);
     const allowedEmpty = schema.allowEmptyValue;
     for (const q of queryParams) {
@@ -256,45 +223,5 @@ class Validator {
       (<any>bodySchema).required = ['body'];
     }
     return bodySchema;
-  }
-}
-
-class Security {
-  public static queryParam(
-    apiDocs: OpenAPIV3.Document,
-    schema: OperationObject,
-  ): string[] {
-    const hasPathSecurity = schema.security?.length > 0 ?? false;
-    const hasRootSecurity = apiDocs.security?.length > 0 ?? false;
-
-    let usedSecuritySchema: SecurityRequirementObject[] = [];
-    if (hasPathSecurity) {
-      usedSecuritySchema = schema.security;
-    } else if (hasRootSecurity) {
-      // if no security schema for the path, use top-level security schema
-      usedSecuritySchema = apiDocs.security;
-    }
-
-    const securityQueryParameter = this.getSecurityQueryParams(
-      usedSecuritySchema,
-      apiDocs.components?.securitySchemes,
-    );
-    return securityQueryParameter;
-  }
-
-  private static getSecurityQueryParams(
-    usedSecuritySchema: SecurityRequirementObject[],
-    securitySchema: { [key: string]: ReferenceObject | SecuritySchemeObject },
-  ): string[] {
-    return usedSecuritySchema && securitySchema
-      ? usedSecuritySchema
-          .filter((obj) => Object.entries(obj).length !== 0)
-          .map((sec) => {
-            const securityKey = Object.keys(sec)[0];
-            return <SecuritySchemeObject>securitySchema[securityKey];
-          })
-          .filter((sec) => sec?.type === 'apiKey' && sec?.in == 'query')
-          .map((sec: ApiKeySecurityScheme) => sec.name)
-      : [];
   }
 }

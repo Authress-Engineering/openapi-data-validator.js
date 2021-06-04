@@ -1,4 +1,4 @@
-import * as ajv from 'ajv';
+import { Options as AjvOptions } from 'ajv';
 export { OpenAPIFrameworkArgs };
 
 export type BodySchema =
@@ -22,7 +22,7 @@ export interface OpenAPIFrameworkInit {
   basePaths: string[];
 }
 
-export interface Options extends ajv.Options {
+export interface Options extends AjvOptions {
   // Specific options
   serDesMap?: SerDesMap;
 }
@@ -81,10 +81,8 @@ export interface OpenApiValidatorOpts {
   validateApiSpec?: boolean;
   validateRequests?: boolean | ValidateRequestOpts;
   ignorePaths?: RegExp | Function;
-  unknownFormats?: true | string[] | 'ignore';
   serDes?: SerDes[];
   formats?: Format[];
-  validateFormats?: false | 'fast' | 'full';
 }
 
 export namespace OpenAPIV3 {
@@ -94,7 +92,6 @@ export namespace OpenAPIV3 {
     servers?: ServerObject[];
     paths: PathsObject;
     components?: ComponentsObject;
-    security?: SecurityRequirementObject[];
     tags?: TagObject[];
     externalDocs?: ExternalDocumentationObject;
   }
@@ -162,7 +159,6 @@ export namespace OpenAPIV3 {
     responses?: ResponsesObject;
     callbacks?: { [callback: string]: ReferenceObject | CallbackObject };
     deprecated?: boolean;
-    security?: SecurityRequirementObject[];
     servers?: ServerObject[];
   }
 
@@ -241,7 +237,6 @@ export namespace OpenAPIV3 {
     not?: ReferenceObject | SchemaObject;
 
     // OpenAPI-specific properties
-    nullable?: boolean;
     discriminator?: DiscriminatorObject;
     readOnly?: boolean;
     writeOnly?: boolean;
@@ -321,10 +316,6 @@ export namespace OpenAPIV3 {
 
   export interface CallbackObject {
     [url: string]: PathItemObject;
-  }
-
-  export interface SecurityRequirementObject {
-    [name: string]: string[];
   }
 
   export interface ComponentsObject {
