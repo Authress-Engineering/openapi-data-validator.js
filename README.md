@@ -27,3 +27,12 @@ const newRequest = {
 };
 await validator(newRequest);
 ```
+
+## FAQs
+
+#### Why not just use AJV
+AJV is the best, but there are some things that just are very OpenAPI specific that don't make sense to be in the validator. Don't need them? Great, go use AJV.
+
+* Top level defined Path parameters - AJV doesn't understand
+* Inline request body definitions, AJV doesn't understand schema defined in the method, it has to be in a component
+* Body Content-Type validation - Request bodies with multiple content types allowed
