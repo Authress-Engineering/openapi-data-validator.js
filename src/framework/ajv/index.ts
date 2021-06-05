@@ -27,6 +27,7 @@ function createAjv(
     discriminator: true,
     allErrors: true,
     jsPropertySyntax: true,
+    coerceTypes: 'array',
     ...options,
     logger: {
       log(...args) { console.log(...args) },

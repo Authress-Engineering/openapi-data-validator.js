@@ -49,6 +49,7 @@ export function normalizeParameter(
   return { name, schema };
 }
 
+// https://swagger.io/docs/specification/serialization/
 function applyParameterStyle(param: OpenAPIV3.ParameterObject) {
   if (!param.style) {
     if (param.in === 'path') {
@@ -63,12 +64,13 @@ function applyParameterStyle(param: OpenAPIV3.ParameterObject) {
   }
 }
 
+// https://swagger.io/docs/specification/serialization/
 function applyParameterExplode(param: OpenAPIV3.ParameterObject) {
   if (param.explode == null) {
     if (param.in === 'path') {
       param.explode = false;
     } else if (param.in === 'query') {
-      param.explode = true;
+      param.explode = false;
     } else if (param.style === 'header') {
       param.explode = false;
     } else if (param.style === 'cookie') {
