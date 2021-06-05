@@ -9,7 +9,7 @@ export type BodySchema =
 export interface ParametersSchema {
   query: object;
   headers: object;
-  params: object;
+  path: object;
   cookies: object;
 }
 
@@ -418,7 +418,7 @@ export interface OpenApiRequest {
   body?: string,
   signedCookies?: Record<string, string>,
   cookies?: Record<string, string>,
-  params?: Record<string, unknown>
+  path?: Record<string, unknown>
 }
 
 export type OpenApiRequestHandler = (

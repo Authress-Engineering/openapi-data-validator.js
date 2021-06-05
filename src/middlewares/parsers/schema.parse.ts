@@ -38,7 +38,7 @@ export class ParametersSchemaParser {
         properties: {},
         additionalProperties: true
       },
-      params: {
+      path: {
         title: 'HTTP path',
         type: 'object',
         properties: {},

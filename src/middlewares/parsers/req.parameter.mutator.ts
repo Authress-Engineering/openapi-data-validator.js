@@ -26,7 +26,7 @@ const ARRAY_DELIMITER = {
 const REQUEST_FIELDS = {
   query: 'query',
   header: 'headers',
-  path: 'params',
+  path: 'path',
   cookie: 'cookies',
 };
 
@@ -210,7 +210,7 @@ export class RequestParameterMutator {
     name: string,
   ): void {
     /**
-     * support json in request params, query, headers and cookies
+     * support json in request path, query, headers and cookies
      * like this filter={"type":"t-shirt","color":"blue"}
      *
      * https://swagger.io/docs/specification/describing-parameters/#schema-vs-content

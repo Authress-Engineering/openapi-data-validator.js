@@ -51,50 +51,6 @@ function createAjv(
   ajv.addKeyword({ keyword: 'components' });
   ajv.addKeyword({ keyword: 'example' });
 
-  // if (options.serDesMap) {
-  //   ajv.addKeyword({
-  //     keyword: 'x-eov-serdes',
-  //     modifying: true,
-  //     compile: (sch) => {
-  //       if (sch) {
-  //         return function validate(data, path, obj, propName) {
-  //           if (typeof data === 'object') return true;
-  //           if(!!sch.deserialize) {
-  //             obj[propName] = sch.deserialize(data);
-  //           }
-  //           return true;
-  //         };
-  //       }
-  //       return () => true;
-  //     },
-  //   });
-  // }
-  // ajv.removeKeyword('readOnly');
-  // ajv.addKeyword({
-  //   keyword: 'readOnly',
-  //   modifying: true,
-  //   compile: (sch) => {
-  //     if (sch) {
-  //       return function validate(schema: any, parentSchema: AnySchemaObject, it: SchemaObjCxt) {
-  //         const isValid = !(sch === true && it.data != null);
-  //         delete schema[it.propertyName.str];
-  //         (<ValidateFunction>validate).errors = [
-  //           {
-  //             keyword: 'readOnly',
-  //             schemaPath: it.schemaPath.str,
-  //             instancePath: it.schemaPath.str,
-  //             message: `is read-only`,
-  //             params: { readOnly: it.propertyName.str },
-  //           },
-  //         ];
-  //         return isValid;
-  //       };
-  //     }
-
-  //     return () => true;
-  //   },
-  // });
-
   if (openApiSpec.components?.schemas) {
     Object.entries(openApiSpec.components.schemas).forEach(([id, schema]) => {
       ajv.addSchema(

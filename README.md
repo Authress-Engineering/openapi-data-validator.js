@@ -20,7 +20,7 @@ const newRequest = {
   headers: { Authorization: 'Bearer Token' },
   query: { limit: 10 },
   body: { field: true },
-  params: { user: 'userId' },
+  path: { user: 'userId' },
 
   // Matched openapi specification generic route
   route: request.route

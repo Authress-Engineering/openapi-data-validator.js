@@ -109,7 +109,7 @@ export class RequestValidator {
       const data = {
         query: req.query ?? {},
         headers: req.headers || {},
-        params: req.params || {},
+        path: req.path || {},
         cookies,
         body: req.body,
       };
@@ -198,7 +198,7 @@ class Validator {
     return {
       paths: this.apiDoc.paths,
       components: this.apiDoc.components,
-      required: ['query', 'headers', 'params'],
+      required: ['query', 'headers', 'path'],
       properties: { ...parameters, body: {} },
     };
   }
@@ -213,7 +213,7 @@ class Validator {
       properties: {
         query: {},
         headers: {},
-        params: {},
+        path: {},
         cookies: {},
         body: bodyProps,
       },
