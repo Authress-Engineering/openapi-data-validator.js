@@ -16,11 +16,11 @@ const openApiValidator = new OpenApiValidator({ apiSpec: spec });
 const validator = openApiValidator.createValidator();
 
 const newRequest = {
-  method: request.httpMethod,
-  headers: request.headers,
-  query: request.queryStringParameters,
-  body: request.body,
-  params: request.pathParameters,
+  method: 'GET',
+  headers: { Authorization: 'Bearer Token' },
+  query: { limit: 10 },
+  body: { field: true },
+  params: { user: 'userId' },
 
   // Matched openapi specification generic route
   route: request.route

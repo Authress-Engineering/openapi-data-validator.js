@@ -5,7 +5,7 @@ import Ajv from 'ajv';
 const PARAM_TYPE = {
   query: 'query',
   header: 'headers',
-  path: 'params',
+  path: 'path',
   cookie: 'cookies',
 };
 
@@ -31,7 +31,32 @@ export class ParametersSchemaParser {
    * @param parameters
    */
   public parse(path: string, parameters: Parameter[] = []): ParametersSchema {
-    const schemas = { query: {}, headers: {}, params: {}, cookies: {} };
+    const schemas = {
+      headers: {
+        title: 'HTTP headers',
+        type: 'object',
+        properties: {},
+        additionalProperties: true
+      },
+      params: {
+        title: 'HTTP path',
+        type: 'object',
+        properties: {},
+        additionalProperties: false
+      },
+      query: {
+        title: 'HTTP query',
+        type: 'object',
+        properties: {},
+        additionalProperties: false
+      },
+      cookies: {
+        title: 'HTTP cookies',
+        type: 'object',
+        properties: {},
+        additionalProperties: false
+      },
+    };
 
     parameters.forEach((p) => {
       const parameter = dereferenceParameter(this._apiDocs, p);
@@ -40,13 +65,6 @@ export class ParametersSchemaParser {
 
       const reqField = PARAM_TYPE[parameter.in];
       const { name, schema } = normalizeParameter(this._ajv, parameter);
-
-      if (!schemas[reqField].properties) {
-        schemas[reqField] = {
-          type: 'object',
-          properties: {},
-        };
-      }
 
       schemas[reqField].properties[name] = schema;
       if (reqField === 'query' && parameter.allowEmptyValue) {
