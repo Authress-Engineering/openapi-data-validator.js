@@ -30,7 +30,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^9.0",
-    "ajv": "^8.5",
+    "ajv": "8",
     "ajv-formats": "^2.1",
     "content-type": "^1.0",
     "lodash.clonedeep": "^4.5",
