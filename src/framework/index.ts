@@ -78,14 +78,14 @@ export class OpenAPIFramework {
       const absolutePath = path.resolve(origCwd, filePath);
       if (fs.existsSync(absolutePath)) {
         // Get document, or throw exception on error
-        return $RefParser.dereference(absolutePath);
+        return Object.assign($RefParser.dereference(absolutePath));
       } else {
         throw new Error(
           `${this.loggingPrefix}spec could not be read at ${filePath}`,
         );
       }
     }
-    return $RefParser.dereference(filePath);
+    return Object.assign($RefParser.dereference(filePath));
   }
 
   private sortApiDocTags(apiDoc: OpenAPIV3.Document): void {
