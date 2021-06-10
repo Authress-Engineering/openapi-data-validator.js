@@ -1,15 +1,15 @@
-## OpenAPI Model Validator
+## OpenAPI Data Validator
 Lightweight OpenAPI complete request model validator. Fast, unopinionated, full featured validator for API requests that utilize OpenAPI docs for API documentation.
 
 ## Usage
 It is simple, and that's all there is to it!
 
 ```sh
-npm install openapi-model-validator --save
+npm install openapi-data-validator --save
 ```
 
 ```js
-const { OpenApiValidator } = require('openapi-model-validator');
+const { OpenApiValidator } = require('openapi-data-validator');
 const spec = require('./openapi.json');
 
 const openApiValidator = new OpenApiValidator({ apiSpec: spec });
