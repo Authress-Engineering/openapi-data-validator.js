@@ -1,5 +1,5 @@
 {
-  "name": "openapi-model-validator",
+  "name": "openapi-data-validator",
   "version": "0.0.0",
   "description": "Automatically validate API requests and responses with OpenAPI 3.",
   "main": "dist/index.js",
