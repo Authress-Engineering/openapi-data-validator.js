@@ -80,7 +80,6 @@ export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
   validateApiSpec?: boolean;
   validateRequests?: boolean | ValidateRequestOpts;
-  ignorePaths?: RegExp | Function;
   serDes?: SerDes[];
   formats?: Format[];
 }

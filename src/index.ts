@@ -1,7 +1,6 @@
 import ono from 'ono';
 import * as _uniq from 'lodash.uniq';
 import { RequestValidator } from './middlewares/openapi.request.validator';
-import { OpenApiContext } from './framework/openapi.context';
 import { Spec } from './framework/openapi.spec.loader';
 import {
   OpenApiValidatorOpts,
@@ -47,11 +46,9 @@ export class OpenApiValidator {
     return async (request: OpenApiRequest): Promise<void> => {
       if (!requestValidator) {
         const spec = await specAsync;
-        const apiDoc = spec.apiDoc;
         const ajvOpts = this.ajvOpts.preprocessor;
-        const sp = new SchemaPreprocessor(apiDoc, ajvOpts).preProcess();
-        const context = new OpenApiContext(spec, this.options.ignorePaths);
-        requestValidator = new RequestValidator(context.apiDoc, this.ajvOpts.request);
+        const sp = new SchemaPreprocessor(spec.apiDoc, ajvOpts).preProcess();
+        requestValidator = new RequestValidator(spec.apiDoc, this.ajvOpts.request);
       }
 
       requestValidator.validate(request);
