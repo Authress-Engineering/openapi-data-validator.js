@@ -1,6 +1,8 @@
 ## OpenAPI Data Validator
 Lightweight OpenAPI complete request model validator. Fast, unopinionated, full featured validator for API requests that utilize OpenAPI docs for API documentation.
 
+[![npm version](https://badge.fury.io/js/openapi-data-validator.svg)](https://badge.fury.io/js/openapi-data-validator)
+
 ## Usage
 It is simple, and that's all there is to it!
 
