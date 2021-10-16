@@ -14,7 +14,6 @@ import { defaultSerDes } from './framework/base.serdes';
 import { SchemaPreprocessor } from './middlewares/parsers/schema.preprocessor';
 import { AjvOptions } from './framework/ajv/options';
 
-import * as cloneDeep from 'lodash.clonedeep';
 import { OpenApiSpecLoader } from './framework/openapi.spec.loader';
 export { OpenApiValidatorOpts } from './framework/types';
 
@@ -40,7 +39,7 @@ export class OpenApiValidator {
   }
 
   createValidator(): Function {
-    const specAsync = new OpenApiSpecLoader({ apiDoc: cloneDeep(this.options.apiSpec), validateApiSpec: this.options.validateApiSpec }).load();
+    const specAsync = new OpenApiSpecLoader({ apiDoc: this.options.apiSpec, validateApiSpec: this.options.validateApiSpec }).load();
 
     let requestValidator;
     return async (request: OpenApiRequest): Promise<void> => {

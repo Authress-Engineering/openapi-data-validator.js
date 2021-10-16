@@ -8,6 +8,7 @@ import {
   OpenAPIFrameworkVisitor,
   OpenAPIV3,
 } from './types';
+import * as cloneDeep from 'lodash.clonedeep';
 
 export class OpenAPIFramework {
   private readonly args: OpenAPIFrameworkArgs;
@@ -70,8 +71,8 @@ export class OpenAPIFramework {
     };
   }
 
-  private loadSpec(
-    filePath: string | object,
+  private async loadSpec(
+    filePath: Promise<object> | string | object,
   ): Promise<OpenAPIV3.Document> {
     if (typeof filePath === 'string') {
       const origCwd = process.cwd();
@@ -85,7 +86,7 @@ export class OpenAPIFramework {
         );
       }
     }
-    return Object.assign($RefParser.dereference(filePath));
+    return Object.assign($RefParser.dereference(cloneDeep(await filePath)));
   }
 
   private sortApiDocTags(apiDoc: OpenAPIV3.Document): void {

@@ -395,7 +395,7 @@ export interface OpenAPIFrameworkPathObject {
 }
 
 interface OpenAPIFrameworkArgs {
-  apiDoc: OpenAPIV3.Document | string;
+  apiDoc: OpenAPIV3.Document | Promise<OpenAPIV3.Document> | string;
   validateApiSpec?: boolean;
 }
 
