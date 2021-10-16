@@ -1,7 +1,6 @@
 import ono from 'ono';
 import * as _uniq from 'lodash.uniq';
 import { RequestValidator } from './middlewares/openapi.request.validator';
-import { Spec } from './framework/openapi.spec.loader';
 import {
   OpenApiValidatorOpts,
   ValidateRequestOpts,
@@ -9,7 +8,6 @@ import {
   OpenApiRequestHandler,
   OpenAPIV3,
 } from './framework/types';
-import { defaultResolver } from './resolvers';
 import { defaultSerDes } from './framework/base.serdes';
 import { SchemaPreprocessor } from './middlewares/parsers/schema.preprocessor';
 import { AjvOptions } from './framework/ajv/options';
@@ -46,8 +44,8 @@ export class OpenApiValidator {
       if (!requestValidator) {
         const spec = await specAsync;
         const ajvOpts = this.ajvOpts.preprocessor;
-        const sp = new SchemaPreprocessor(spec.apiDoc, ajvOpts).preProcess();
-        requestValidator = new RequestValidator(spec.apiDoc, this.ajvOpts.request);
+        const sp = new SchemaPreprocessor(spec, ajvOpts).preProcess();
+        requestValidator = new RequestValidator(spec, this.ajvOpts.request);
       }
 
       requestValidator.validate(request);

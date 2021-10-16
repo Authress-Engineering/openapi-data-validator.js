@@ -4,8 +4,6 @@ import * as $RefParser from '@apidevtools/json-schema-ref-parser';
 import { BasePath } from './base.path';
 import {
   OpenAPIFrameworkArgs,
-  OpenAPIFrameworkInit,
-  OpenAPIFrameworkVisitor,
   OpenAPIV3,
 } from './types';
 import * as cloneDeep from 'lodash.clonedeep';
@@ -18,19 +16,9 @@ export class OpenAPIFramework {
     this.args = args;
   }
 
-  public async initialize(
-    visitor: OpenAPIFrameworkVisitor,
-  ): Promise<OpenAPIFrameworkInit> {
+  public async initialize(): Promise<OpenAPIV3.Document> {
     const args = this.args;
     const apiDoc = await this.loadSpec(args.apiDoc);
-
-    const basePathObs = this.getBasePathsFromServers(apiDoc.servers);
-    const basePaths = Array.from(
-      basePathObs.reduce((acc, bp) => {
-        bp.all().forEach((path) => acc.add(path));
-        return acc;
-      }, new Set<string>()),
-    );
 
     // args.validateApiSpec = true;
     if (args.validateApiSpec) {
@@ -52,23 +40,8 @@ export class OpenAPIFramework {
         );
       }
     }
-    const getApiDoc = () => {
-      return apiDoc;
-    };
 
-    this.sortApiDocTags(apiDoc);
-
-    if (visitor.visitApi) {
-      // const basePaths = basePathObs;
-      visitor.visitApi({
-        basePaths,
-        getApiDoc,
-      });
-    }
-    return {
-      apiDoc,
-      basePaths,
-    };
+    return apiDoc;
   }
 
   private async loadSpec(
@@ -87,27 +60,5 @@ export class OpenAPIFramework {
       }
     }
     return Object.assign($RefParser.dereference(cloneDeep(await filePath)));
-  }
-
-  private sortApiDocTags(apiDoc: OpenAPIV3.Document): void {
-    if (apiDoc && Array.isArray(apiDoc.tags)) {
-      apiDoc.tags.sort((a, b): number => {
-        return a.name < b.name ? -1 : 1;
-      });
-    }
-  }
-
-  private getBasePathsFromServers(
-    servers: OpenAPIV3.ServerObject[],
-  ): BasePath[] {
-    if (!servers || servers.length === 0) {
-      return [new BasePath({ url: '' })];
-    }
-    const basePathsMap: { [key: string]: BasePath } = {};
-    for (const server of servers) {
-      const basePath = new BasePath(server);
-      basePathsMap[basePath.expressPath] = basePath;
-    }
-    return Object.keys(basePathsMap).map((key) => basePathsMap[key]);
   }
 }

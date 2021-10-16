@@ -17,11 +17,6 @@ export interface ValidationSchema extends ParametersSchema {
   body: BodySchema;
 }
 
-export interface OpenAPIFrameworkInit {
-  apiDoc: OpenAPIV3.Document;
-  basePaths: string[];
-}
-
 export interface Options extends AjvOptions {
   // Specific options
   serDesMap?: SerDesMap;
@@ -403,10 +398,6 @@ export interface OpenAPIFrameworkAPIContext {
   // basePaths: BasePath[];
   basePaths: string[];
   getApiDoc(): OpenAPIV3.Document;
-}
-
-export interface OpenAPIFrameworkVisitor {
-  visitApi?(context: OpenAPIFrameworkAPIContext): void;
 }
 
 export interface OpenApiRequest {

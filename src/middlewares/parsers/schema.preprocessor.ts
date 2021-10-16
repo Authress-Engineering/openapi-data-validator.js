@@ -1,5 +1,4 @@
 import Ajv from 'ajv';
-import * as cloneDeep from 'lodash.clonedeep';
 import * as _get from 'lodash.get';
 import { createRequestAjv } from '../../framework/ajv';
 import {
