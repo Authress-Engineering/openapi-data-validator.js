@@ -1,5 +1,5 @@
 import Ajv, { ValidateFunction } from 'ajv';
-import { createRequestAjv } from '../framework/ajv/index';
+import { createRequestAjv } from '../framework/ajv';
 import {
   ContentType,
   ajvErrorsToValidatorError,

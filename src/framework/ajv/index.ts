@@ -7,20 +7,6 @@ export function createRequestAjv(
   openApiSpec: OpenAPIV3.Document,
   options: Options = {}
 ): Ajv {
-  return createAjv(openApiSpec, options);
-}
-
-export function createResponseAjv(
-  openApiSpec: OpenAPIV3.Document,
-  options: Options = {}
-): Ajv {
-  return createAjv(openApiSpec, options);
-}
-
-function createAjv(
-  openApiSpec: OpenAPIV3.Document,
-  options: Options = {}
-): Ajv {
   const ajv = new Ajv({
     strictTypes: false,
     discriminator: true,

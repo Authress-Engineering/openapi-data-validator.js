@@ -10,7 +10,8 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc",
     "test": "tsc && mocha tests/*.test.js -R spec",
-    "lint": "eslint --ext .js,.ts src tests make.js"
+    "lint": "eslint --ext .js,.ts src tests make.js",
+    "profile": "rm isolate-* && node --prof tests/modelValidator.test.js && node --prof-process ./isolate* > results.txt && xdg-open results.txt"
   },
   "repository": {
     "url": "https://github.com/rhosys/openapi-model-validator.js"

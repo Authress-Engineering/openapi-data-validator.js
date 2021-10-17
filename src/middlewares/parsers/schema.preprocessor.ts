@@ -363,22 +363,4 @@ export class SchemaPreprocessor {
       v.parameters.push(param);
     }
   }
-
-  private findKeys(object, searchFunc): string[] {
-    const matches = [];
-    if (!object) {
-      return matches;
-    }
-    const keys = Object.keys(object);
-    for (let i = 0; i < keys.length; i++) {
-      if (searchFunc(object[keys[i]])) {
-        matches.push(keys[i]);
-      }
-    }
-    return matches;
-  }
-
-  getKeyFromRef(ref) {
-    return ref.split('/components/schemas/')[1];
-  }
 }
