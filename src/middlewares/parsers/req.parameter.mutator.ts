@@ -29,7 +29,7 @@ type Schema = ReferenceObject | SchemaObject;
 
 /**
  * A class top parse and mutate the incoming request parameters according to the openapi spec.
- * the request is mutated to accomodate various styles and types e.g. form, explode, deepObject, etc
+ * the request is mutated to accommodate various styles and types e.g. form, explode, deepObject, etc
  */
 export class RequestParameterMutator {
   private apiDocs: OpenAPIV3.Document;
@@ -50,7 +50,7 @@ export class RequestParameterMutator {
   }
 
   /**
-   * Modifies an incoing request object by applying the openapi schema
+   * Modifies an incoming request object by applying the openapi schema
    * req values may be parsed/mutated as a JSON object, JSON Exploded Object, JSON Array, or JSON Exploded Array
    * @param req
    */
