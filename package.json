@@ -11,7 +11,7 @@
     "build": "rm -rf dist/ && tsc",
     "test": "tsc && mocha tests/*.test.js -R spec",
     "lint": "eslint --ext .js,.ts src tests make.js",
-    "profile": "rm isolate-* && node --prof tests/modelValidator.test.js && node --prof-process ./isolate* > results.txt && xdg-open results.txt"
+    "profile": "rm isolate-* && node --prof integrationTests/modelValidator.test.js && node --prof-process ./isolate* > results.txt && xdg-open results.txt"
   },
   "repository": {
     "url": "https://github.com/rhosys/openapi-model-validator.js"
@@ -52,6 +52,7 @@
     "ci-build-tools": "^1.0.13",
     "commander": "^7.2.0",
     "coveralls": "^3.1.0",
+    "error-object-polyfill": "^1.1.14",
     "eslint": "^7.20.0",
     "eslint-config-cimpress-atsquad": "^1.0.67",
     "eslint-plugin-import": "^2.22.1",
@@ -62,6 +63,7 @@
     "luxon": "^2.0.2",
     "mocha": "^8.4.0",
     "nodemon": "^2.0.13",
+    "sinon": "^11.1.2",
     "source-map-support": "0.5.19",
     "ts-node": "^9.1.1",
     "typescript": "^4.4.4"

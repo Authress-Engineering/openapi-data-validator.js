@@ -8,7 +8,7 @@ class ModelValidator {
       return this.validator;
     }
 
-    const spec = import('./openapi.js').then(doc => doc.default);
+    const spec = import('../tests/openapi.js').then(doc => doc.default);
     const { OpenApiValidator } = require('../dist/index');
     const openApiValidator = new OpenApiValidator({ apiSpec: spec, validateRequests: { allowUnknownQueryParameters: false } });
     this.validator = openApiValidator.createValidator();

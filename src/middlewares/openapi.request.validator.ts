@@ -28,7 +28,6 @@ class Validator {
   readonly schemaGeneral: object;
   readonly schemaBody: object;
   readonly validatorGeneral: ValidateFunction;
-  readonly validatorBody: ValidateFunction;
   readonly allSchemaProperties: ValidationSchema;
 
   constructor(
@@ -37,50 +36,38 @@ class Validator {
     bodySchema: BodySchema,
     ajv: {
       general: Ajv;
-      body: Ajv;
     }
   ) {
     this.apiDoc = apiDoc;
-    this.schemaGeneral = this.getSchemaGeneral(parametersSchema);
-    this.schemaBody = this.getSchemaBody(bodySchema);
+    this.schemaGeneral = this.getSchemaGeneral(parametersSchema, bodySchema);
     this.allSchemaProperties = {
-      ...(<any> this.schemaGeneral).properties, // query, header, params props
-      body: (<any> this.schemaBody).properties.body // body props
+      ...(<any> this.schemaGeneral).properties // query, header, params, body props
     };
     this.validatorGeneral = ajv.general.compile(this.schemaGeneral);
-    this.validatorBody = ajv.body.compile(this.schemaBody);
   }
 
-  private getSchemaGeneral(parameters: ParametersSchema): object {
+  private getSchemaGeneral(parameters: ParametersSchema, body: BodySchema): object {
     // $schema: "http://json-schema.org/draft-04/schema#",
-    return {
-      paths: this.apiDoc.paths,
-      components: this.apiDoc.components,
-      required: ['query', 'headers', 'path'],
-      properties: { ...parameters, body: {} }
-    };
-  }
-
-  private getSchemaBody(body: BodySchema): object {
-    // $schema: "http://json-schema.org/draft-04/schema#"
     // eslint-disable-next-line dot-notation
     const isBodyBinary = body?.['format'] === 'binary';
-    const bodyProps = isBodyBinary ? {} : body;
+    const bodyProps = !isBodyBinary && body || {};
     const bodySchema = {
-      paths: this.apiDoc.paths,
-      components: this.apiDoc.components,
+      required: ['query', 'headers', 'path'],
       properties: {
         query: {},
         headers: {},
         path: {},
         cookies: {},
-        body: bodyProps
+        body: bodyProps,
+        ...parameters
       }
     };
+
     const requireBody = (<SchemaObject>body).required && !isBodyBinary;
     if (requireBody) {
-      (<any>bodySchema).required = ['body'];
+      (<any>bodySchema).required.push('body');
     }
+
     return bodySchema;
   }
 }
@@ -89,7 +76,6 @@ export class RequestValidator {
   private middlewareCache: { [key: string]: OpenApiRequestHandler } = {};
   private apiDoc: OpenAPIV3.Document;
   private ajv: Ajv;
-  private ajvBody: Ajv;
   private requestOpts: ValidateRequestOpts = {};
 
   constructor(
@@ -101,7 +87,6 @@ export class RequestValidator {
     this.requestOpts.allowUnknownQueryParameters
       = options.allowUnknownQueryParameters;
     this.ajv = createRequestAjv(apiDoc, options);
-    this.ajvBody = createRequestAjv(apiDoc, options);
   }
 
   public validate(req: OpenApiRequest): void {
@@ -133,8 +118,7 @@ export class RequestValidator {
     const parameters = schemaParser.parse(path, reqSchema.parameters);
     const body = new BodySchemaParser().parse(path, reqSchema, contentType);
     const validator = new Validator(this.apiDoc, parameters, body, {
-      general: this.ajv,
-      body: this.ajvBody
+      general: this.ajv
     });
 
     const allowUnknownQueryParameters = !!(
@@ -171,18 +155,12 @@ export class RequestValidator {
         cookies,
         body: req.body
       };
-      const validatorBody = validator.validatorBody;
       const valid = validator.validatorGeneral(data);
-      const validBody = validatorBody(data);
 
-      if (valid && validBody) {
+      if (valid) {
         return;
       }
-      const errors = augmentAjvErrors(
-        []
-          .concat(validator.validatorGeneral.errors ?? [])
-          .concat(validatorBody.errors ?? [])
-      );
+      const errors = augmentAjvErrors([].concat(validator.validatorGeneral.errors ?? []));
       const err = ajvErrorsToValidatorError(400, errors);
       const message = this.ajv.errorsText(errors, { dataVar: 'request' });
       const error: BadRequest = new BadRequest({
