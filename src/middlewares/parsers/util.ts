@@ -1,10 +1,10 @@
+/* eslint-disable dot-notation */
 import Ajv from 'ajv';
 import { OpenAPIV3 } from '../../framework/types';
-import { OpenAPIFramework } from '../../framework';
 
 export function dereferenceParameter(
   apiDocs: OpenAPIV3.Document,
-  parameter: OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject,
+  parameter: OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject
 ): OpenAPIV3.ParameterObject {
   // TODO this should recurse or use ajv.getSchema - if implemented as such, may want to cache the result
   // as it is called by query.paraer and req.parameter mutator
@@ -12,14 +12,13 @@ export function dereferenceParameter(
     const p = <OpenAPIV3.ReferenceObject>parameter;
     const id = p.$ref.replace(/^.+\//i, '');
     return <OpenAPIV3.ParameterObject>apiDocs.components.parameters[id];
-  } else {
-    return <OpenAPIV3.ParameterObject>parameter;
   }
+  return <OpenAPIV3.ParameterObject>parameter;
 }
 
 export function normalizeParameter(
   ajv: Ajv,
-  parameter: OpenAPIV3.ParameterObject,
+  parameter: OpenAPIV3.ParameterObject
 ): {
   name: string;
   schema: OpenAPIV3.SchemaObject;
@@ -43,8 +42,8 @@ export function normalizeParameter(
   applyParameterStyle(parameter);
   applyParameterExplode(parameter);
 
-  const name =
-    parameter.in === 'header' ? parameter.name.toLowerCase() : parameter.name;
+  const name
+    = parameter.in === 'header' ? parameter.name.toLowerCase() : parameter.name;
 
   return { name, schema };
 }
@@ -66,7 +65,7 @@ function applyParameterStyle(param: OpenAPIV3.ParameterObject) {
 
 // https://swagger.io/docs/specification/serialization/
 function applyParameterExplode(param: OpenAPIV3.ParameterObject) {
-  if (param.explode == null) {
+  if (!param.explode && param.explode !== false) {
     if (param.in === 'path') {
       param.explode = false;
     } else if (param.in === 'query') {
@@ -82,6 +81,7 @@ function applyParameterExplode(param: OpenAPIV3.ParameterObject) {
 export function dereferenceSchema(ajv: Ajv, ref: string) {
   // TODO cache schemas - so that we don't recurse every time
   const derefSchema = ajv.getSchema(ref);
+  // eslint-disable-next-line dot-notation
   if (derefSchema?.['$ref']) {
     return dereferenceSchema(ajv, '');
   }
@@ -89,7 +89,7 @@ export function dereferenceSchema(ajv: Ajv, ref: string) {
 }
 
 function is$Ref(
-  parameter: OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject,
+  parameter: OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject
 ): boolean {
-  return parameter.hasOwnProperty('$ref');
+  return Object.hasOwnProperty.call(parameter, '$ref');
 }

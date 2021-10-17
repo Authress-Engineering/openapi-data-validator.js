@@ -24,7 +24,7 @@ export class ContentType {
   }
 
   public equivalents(): string[] {
-    if (!this.withoutBoundary) return [];
+    if (!this.withoutBoundary) {return [];}
     if (this.charSet) {
       return [this.mediaType, `${this.mediaType}; ${this.charSet}`];
     }
@@ -38,13 +38,13 @@ export class ContentType {
  * @param errors
  */
 export function augmentAjvErrors(
-  errors: ErrorObject[] = [],
+  errors: ErrorObject[] = []
 ): ErrorObject[] {
-  errors.forEach((e) => {
+  errors.forEach(e => {
     if (e.keyword === 'enum') {
       const params: any = e.params;
       const allowedEnumValues = params?.allowedValues;
-      e.message = !!allowedEnumValues
+      e.message = allowedEnumValues
         ? `${e.message}: ${allowedEnumValues.join(', ')}`
         : e.message;
     }
@@ -53,23 +53,23 @@ export function augmentAjvErrors(
 }
 export function ajvErrorsToValidatorError(
   status: number,
-  errors: ErrorObject[],
+  errors: ErrorObject[]
 ): ValidationError {
   return {
     status,
-    errors: errors.map((e) => {
+    errors: errors.map(e => {
       const params: any = e.params;
-      const required =
-        params?.missingProperty && e.instancePath + '.' + params.missingProperty;
-      const additionalProperty =
-        params?.additionalProperty &&
-        e.instancePath + '.' + params.additionalProperty;
+      const required
+        = params?.missingProperty && `${e.instancePath}.${params.missingProperty}`;
+      const additionalProperty
+        = params?.additionalProperty
+        && `${e.instancePath}.${params.additionalProperty}`;
       const path = required ?? additionalProperty ?? e.instancePath ?? e.schemaPath;
       return {
         path,
         message: e.message,
-        errorCode: `${e.keyword}.openapi.validation`,
+        errorCode: `${e.keyword}.openapi.validation`
       };
-    }),
+    })
   };
 }

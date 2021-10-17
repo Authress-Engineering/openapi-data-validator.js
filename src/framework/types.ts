@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-use-before-define */
 import { Options as AjvOptions } from 'ajv';
-export { OpenAPIFrameworkArgs };
 
 export type BodySchema =
   | OpenAPIV3.ReferenceObject
   | OpenAPIV3.SchemaObject
-  | {};
+  | { format?: string };
 
 export interface ParametersSchema {
   query: object;
@@ -57,15 +58,15 @@ export class SerDesSingleton implements SerDes {
     this.serialize = param.serialize;
     this.deserialize = param.deserialize;
     this.deserializer = {
-      format : param.format,
-      deserialize : param.deserialize
-    }
+      format: param.format,
+      deserialize: param.deserialize
+    };
     this.serializer = {
-      format : param.format,
-      serialize : param.serialize
-    }
+      format: param.format,
+      serialize: param.serialize
+    };
   }
-};
+}
 
 export type SerDesMap = {
   [format: string]: SerDes
@@ -497,8 +498,8 @@ export class HttpError extends Error implements ValidationError {
     this.errors = err.errors ?? [
       {
         path: err.path,
-        message: err.message,
-      },
+        message: err.message
+      }
     ];
   }
 }
@@ -515,7 +516,7 @@ export class BadRequest extends HttpError {
       path: err.path,
       name: 'Bad Request',
       message: err.message,
-      errors: err.errors,
+      errors: err.errors
     });
   }
 }
@@ -530,7 +531,9 @@ export class UnsupportedMediaType extends HttpError {
       status: err.overrideStatus || 415,
       path: err.path,
       name: 'Unsupported Media Type',
-      message: err.message,
+      message: err.message
     });
   }
 }
+
+export { OpenAPIFrameworkArgs };

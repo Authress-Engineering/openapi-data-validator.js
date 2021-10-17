@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { OpenAPIV3, ParametersSchema, BadRequest } from '../../framework/types';
 import { dereferenceParameter, normalizeParameter } from './util';
 import Ajv from 'ajv';
@@ -6,7 +7,7 @@ const PARAM_TYPE = {
   query: 'query',
   header: 'headers',
   path: 'path',
-  cookie: 'cookies',
+  cookie: 'cookies'
 };
 
 type Parameter = OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject;
@@ -55,10 +56,10 @@ export class ParametersSchemaParser {
         type: 'object',
         properties: {},
         additionalProperties: false
-      },
+      }
     };
 
-    parameters.forEach((p) => {
+    parameters.forEach(p => {
       const parameter = dereferenceParameter(this._apiDocs, p);
 
       this.validateParameterType(path, parameter);
@@ -86,7 +87,7 @@ export class ParametersSchemaParser {
 
   private validateParameterType(
     path: string,
-    parameter: OpenAPIV3.ParameterObject,
+    parameter: OpenAPIV3.ParameterObject
   ): void {
     const isKnownType = PARAM_TYPE[parameter.in];
     if (!isKnownType) {
@@ -95,8 +96,8 @@ export class ParametersSchemaParser {
     }
 
     const hasSchema = () => {
-      const contentType =
-        parameter.content && Object.keys(parameter.content)[0];
+      const contentType
+        = parameter.content && Object.keys(parameter.content)[0];
       return !parameter.schema || !parameter.content?.[contentType]?.schema;
     };
 

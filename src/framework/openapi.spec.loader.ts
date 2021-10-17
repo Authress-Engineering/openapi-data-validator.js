@@ -1,8 +1,7 @@
 import { OpenAPIFramework } from './index';
 import {
-  OpenAPIFrameworkAPIContext,
   OpenAPIV3,
-  OpenAPIFrameworkArgs,
+  OpenAPIFrameworkArgs
 } from './types';
 
 export class OpenApiSpecLoader {

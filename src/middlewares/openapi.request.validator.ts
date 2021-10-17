@@ -1,9 +1,9 @@
 import Ajv, { ValidateFunction } from 'ajv';
-import { createRequestAjv } from '../framework/ajv';
+import { createRequestAjv } from '../framework/ajv/index';
 import {
   ContentType,
   ajvErrorsToValidatorError,
-  augmentAjvErrors,
+  augmentAjvErrors
 } from './util';
 import {
   OpenAPIV3,
@@ -14,7 +14,7 @@ import {
   ParametersSchema,
   BodySchema,
   ValidationSchema,
-  OpenApiRequestHandler,
+  OpenApiRequestHandler
 } from '../framework/types';
 import { BodySchemaParser } from './parsers/body.parse';
 import { ParametersSchemaParser } from './parsers/schema.parse';
@@ -22,9 +22,68 @@ import { RequestParameterMutator } from './parsers/req.parameter.mutator';
 
 type OperationObject = OpenAPIV3.OperationObject;
 type SchemaObject = OpenAPIV3.SchemaObject;
-type ReferenceObject = OpenAPIV3.ReferenceObject;
-type SecuritySchemeObject = OpenAPIV3.SecuritySchemeObject;
-type ApiKeySecurityScheme = OpenAPIV3.ApiKeySecurityScheme;
+
+class Validator {
+  private readonly apiDoc: OpenAPIV3.Document;
+  readonly schemaGeneral: object;
+  readonly schemaBody: object;
+  readonly validatorGeneral: ValidateFunction;
+  readonly validatorBody: ValidateFunction;
+  readonly allSchemaProperties: ValidationSchema;
+
+  constructor(
+    apiDoc: OpenAPIV3.Document,
+    parametersSchema: ParametersSchema,
+    bodySchema: BodySchema,
+    ajv: {
+      general: Ajv;
+      body: Ajv;
+    }
+  ) {
+    this.apiDoc = apiDoc;
+    this.schemaGeneral = this.getSchemaGeneral(parametersSchema);
+    this.schemaBody = this.getSchemaBody(bodySchema);
+    this.allSchemaProperties = {
+      ...(<any> this.schemaGeneral).properties, // query, header, params props
+      body: (<any> this.schemaBody).properties.body // body props
+    };
+    this.validatorGeneral = ajv.general.compile(this.schemaGeneral);
+    this.validatorBody = ajv.body.compile(this.schemaBody);
+  }
+
+  private getSchemaGeneral(parameters: ParametersSchema): object {
+    // $schema: "http://json-schema.org/draft-04/schema#",
+    return {
+      paths: this.apiDoc.paths,
+      components: this.apiDoc.components,
+      required: ['query', 'headers', 'path'],
+      properties: { ...parameters, body: {} }
+    };
+  }
+
+  private getSchemaBody(body: BodySchema): object {
+    // $schema: "http://json-schema.org/draft-04/schema#"
+    // eslint-disable-next-line dot-notation
+    const isBodyBinary = body?.['format'] === 'binary';
+    const bodyProps = isBodyBinary ? {} : body;
+    const bodySchema = {
+      paths: this.apiDoc.paths,
+      components: this.apiDoc.components,
+      properties: {
+        query: {},
+        headers: {},
+        path: {},
+        cookies: {},
+        body: bodyProps
+      }
+    };
+    const requireBody = (<SchemaObject>body).required && !isBodyBinary;
+    if (requireBody) {
+      (<any>bodySchema).required = ['body'];
+    }
+    return bodySchema;
+  }
+}
 
 export class RequestValidator {
   private middlewareCache: { [key: string]: OpenApiRequestHandler } = {};
@@ -35,12 +94,12 @@ export class RequestValidator {
 
   constructor(
     apiDoc: OpenAPIV3.Document,
-    options: RequestValidatorOptions = {},
+    options: RequestValidatorOptions = {}
   ) {
     this.middlewareCache = {};
     this.apiDoc = apiDoc;
-    this.requestOpts.allowUnknownQueryParameters =
-      options.allowUnknownQueryParameters;
+    this.requestOpts.allowUnknownQueryParameters
+      = options.allowUnknownQueryParameters;
     this.ajv = createRequestAjv(apiDoc, options);
     this.ajvBody = createRequestAjv(apiDoc, options);
   }
@@ -67,7 +126,7 @@ export class RequestValidator {
   private buildMiddleware(
     path: string,
     reqSchema: OperationObject,
-    contentType: ContentType,
+    contentType: ContentType
   ): OpenApiRequestHandler {
     const apiDoc = this.apiDoc;
     const schemaParser = new ParametersSchemaParser(this.ajv, apiDoc);
@@ -75,12 +134,12 @@ export class RequestValidator {
     const body = new BodySchemaParser().parse(path, reqSchema, contentType);
     const validator = new Validator(this.apiDoc, parameters, body, {
       general: this.ajv,
-      body: this.ajvBody,
+      body: this.ajvBody
     });
 
     const allowUnknownQueryParameters = !!(
-      reqSchema['x-allow-unknown-query-parameters'] ??
-      this.requestOpts.allowUnknownQueryParameters
+      reqSchema['x-allow-unknown-query-parameters']
+      ?? this.requestOpts.allowUnknownQueryParameters
     );
 
     return (req: OpenApiRequest): void => {
@@ -89,7 +148,7 @@ export class RequestValidator {
         this.ajv,
         apiDoc,
         path,
-        schemaProperties,
+        schemaProperties
       );
 
       mutator.modifyRequest(req, reqSchema);
@@ -100,9 +159,9 @@ export class RequestValidator {
 
       const cookies = req.cookies
         ? {
-            ...req.cookies,
-            ...req.signedCookies,
-          }
+          ...req.cookies,
+          ...req.signedCookies
+        }
         : undefined;
 
       const data = {
@@ -110,7 +169,7 @@ export class RequestValidator {
         headers: req.headers || {},
         path: req.path || {},
         cookies,
-        body: req.body,
+        body: req.body
       };
       const validatorBody = validator.validatorBody;
       const valid = validator.validatorGeneral(data);
@@ -122,23 +181,24 @@ export class RequestValidator {
       const errors = augmentAjvErrors(
         []
           .concat(validator.validatorGeneral.errors ?? [])
-          .concat(validatorBody.errors ?? []),
+          .concat(validatorBody.errors ?? [])
       );
       const err = ajvErrorsToValidatorError(400, errors);
       const message = this.ajv.errorsText(errors, { dataVar: 'request' });
       const error: BadRequest = new BadRequest({
         path: req.route,
-        message: message,
+        message: message
       });
       error.errors = err.errors;
       throw error;
-    }
+    };
   }
 
   private processQueryParam(query: object, schema) {
     const entries = Object.entries(schema.properties ?? {});
     let keys = [];
     for (const [key, prop] of entries) {
+      // eslint-disable-next-line dot-notation
       if (prop['type'] === 'object' && prop['additionalProperties']) {
         // we have an object that allows additional properties
         return;
@@ -152,75 +212,14 @@ export class RequestValidator {
       if (!knownQueryParams.has(q)) {
         throw new BadRequest({
           path: `.query.${q}`,
-          message: `Unknown query parameter '${q}'`,
+          message: `Unknown query parameter '${q}'`
         });
       } else if (!allowedEmpty?.has(q) && (query[q] === '' || null)) {
         throw new BadRequest({
           path: `.query.${q}`,
-          message: `Empty value found for query parameter '${q}'`,
+          message: `Empty value found for query parameter '${q}'`
         });
       }
     }
-  }
-}
-
-class Validator {
-  private readonly apiDoc: OpenAPIV3.Document;
-  readonly schemaGeneral: object;
-  readonly schemaBody: object;
-  readonly validatorGeneral: ValidateFunction;
-  readonly validatorBody: ValidateFunction;
-  readonly allSchemaProperties: ValidationSchema;
-
-  constructor(
-    apiDoc: OpenAPIV3.Document,
-    parametersSchema: ParametersSchema,
-    bodySchema: BodySchema,
-    ajv: {
-      general: Ajv;
-      body: Ajv;
-    },
-  ) {
-    this.apiDoc = apiDoc;
-    this.schemaGeneral = this._schemaGeneral(parametersSchema);
-    this.schemaBody = this._schemaBody(bodySchema);
-    this.allSchemaProperties = {
-      ...(<any>this.schemaGeneral).properties, // query, header, params props
-      body: (<any>this.schemaBody).properties.body, // body props
-    };
-    this.validatorGeneral = ajv.general.compile(this.schemaGeneral);
-    this.validatorBody = ajv.body.compile(this.schemaBody);
-  }
-
-  private _schemaGeneral(parameters: ParametersSchema): object {
-    // $schema: "http://json-schema.org/draft-04/schema#",
-    return {
-      paths: this.apiDoc.paths,
-      components: this.apiDoc.components,
-      required: ['query', 'headers', 'path'],
-      properties: { ...parameters, body: {} },
-    };
-  }
-
-  private _schemaBody(body: BodySchema): object {
-    // $schema: "http://json-schema.org/draft-04/schema#"
-    const isBodyBinary = body?.['format'] === 'binary';
-    const bodyProps = isBodyBinary ? {} : body;
-    const bodySchema = {
-      paths: this.apiDoc.paths,
-      components: this.apiDoc.components,
-      properties: {
-        query: {},
-        headers: {},
-        path: {},
-        cookies: {},
-        body: bodyProps,
-      },
-    };
-    const requireBody = (<SchemaObject>body).required && !isBodyBinary;
-    if (requireBody) {
-      (<any>bodySchema).required = ['body'];
-    }
-    return bodySchema;
   }
 }

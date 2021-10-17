@@ -2,7 +2,7 @@ import { ContentType } from '../util';
 
 import {
   OpenAPIV3,
-  BodySchema,
+  BodySchema
 } from '../../framework/types';
 
 export class BodySchemaParser {
@@ -11,12 +11,12 @@ export class BodySchemaParser {
   public parse(
     path: string,
     pathSchema: OpenAPIV3.OperationObject,
-    contentType: ContentType,
+    contentType: ContentType
   ): BodySchema {
     // The schema.preprocessor will have dereferenced the RequestBodyObject
     // thus we can assume a RequestBodyObject, not a ReferenceObject
     const requestBody = <OpenAPIV3.RequestBodyObject>pathSchema.requestBody;
-    if (requestBody?.hasOwnProperty('content')) {
+    if (Object.hasOwnProperty.call(requestBody || {}, 'content')) {
       return this.toSchema(path, contentType, requestBody);
     }
     return {};
@@ -25,9 +25,9 @@ export class BodySchemaParser {
   private toSchema(
     path: string,
     contentType: ContentType,
-    requestBody: OpenAPIV3.RequestBodyObject,
+    requestBody: OpenAPIV3.RequestBodyObject
   ): BodySchema {
-    if (!requestBody?.content) return {};
+    if (!requestBody?.content) {return {};}
 
     let content = null;
     for (const type of contentType.equivalents()) {
@@ -45,11 +45,11 @@ export class BodySchemaParser {
         break;
       }
 
-      if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) continue; // not a wildcard of type application/*
+      if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) {continue;} // not a wildcard of type application/*
 
       const [type] = requestContentType.split('/', 1);
 
-      if (new RegExp(`^${type}\/.+$`).test(contentType.contentType)) {
+      if (new RegExp(`^${type}/.+$`).test(contentType.contentType)) {
         content = requestBody.content[requestContentType];
         break;
       }

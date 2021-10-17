@@ -1,6 +1,7 @@
-.vscode
 .idea
 .DS_Store
 node_modules
 *.orig
 dist
+yarn-error.log
+results.txt

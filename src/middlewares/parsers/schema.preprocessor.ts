@@ -7,24 +7,14 @@ import {
   Options
 } from '../../framework/types';
 
-interface TraversalStates {
-  req: TraversalState;
-  res: TraversalState;
-}
-
 interface TraversalState {
   kind: 'req' | 'res';
   path: string[];
 }
 
-interface TopLevelPathNodes {
-  requestBodies: Root<SchemaObject>[];
-  responses: Root<SchemaObject>[];
-}
-interface TopLevelSchemaNodes extends TopLevelPathNodes {
-  schemas: Root<SchemaObject>[];
-  requestBodies: Root<SchemaObject>[];
-  responses: Root<SchemaObject>[];
+interface TraversalStates {
+  req: TraversalState;
+  res: TraversalState;
 }
 
 class Node<T, P> {
@@ -37,8 +27,6 @@ class Node<T, P> {
     this.schema = schema;
   }
 }
-type SchemaObjectNode = Node<SchemaObject, SchemaObject>;
-
 class Root<T> extends Node<T, T> {
   constructor(schema: T, path: string[]) {
     super(null, schema, path);
@@ -46,8 +34,17 @@ class Root<T> extends Node<T, T> {
 }
 
 type SchemaObject = OpenAPIV3.SchemaObject;
-type ReferenceObject = OpenAPIV3.ReferenceObject;
-type Schema = ReferenceObject | SchemaObject;
+type SchemaObjectNode = Node<SchemaObject, SchemaObject>;
+
+interface TopLevelPathNodes {
+  requestBodies: Root<SchemaObject>[];
+  responses: Root<SchemaObject>[];
+}
+interface TopLevelSchemaNodes extends TopLevelPathNodes {
+  schemas: Root<SchemaObject>[];
+  requestBodies: Root<SchemaObject>[];
+  responses: Root<SchemaObject>[];
+}
 
 export const httpMethods = new Set([
   'get',
@@ -57,7 +54,7 @@ export const httpMethods = new Set([
   'options',
   'head',
   'patch',
-  'trace',
+  'trace'
 ]);
 export class SchemaPreprocessor {
   private ajv: Ajv;
@@ -79,17 +76,13 @@ export class SchemaPreprocessor {
     const schemaNodes = {
       schemas: componentSchemas,
       requestBodies: r.requestBodies,
-      responses: r.responses,
+      responses: r.responses
     };
 
     // Traverse the schemas
     this.traverseSchemas(schemaNodes, (parent, schema, opts) =>
-      this.schemaVisitor(parent, schema, opts),
+      this.schemaVisitor(parent, schema, opts)
     );
-
-    return {
-      apiDoc: this.apiDoc
-    };
   }
 
   private gatherComponentSchemaNodes(): Root<SchemaObject>[] {
@@ -128,7 +121,7 @@ export class SchemaPreprocessor {
     }
     return {
       requestBodies: requestBodySchemas,
-      responses: responseSchemas,
+      responses: responseSchemas
     };
   }
 
@@ -142,7 +135,7 @@ export class SchemaPreprocessor {
     const recurse = (parent, node, opts: TraversalStates) => {
       const schema = node.schema;
 
-      if (!schema || seen.has(schema)) return;
+      if (!schema || seen.has(schema)) {return;}
 
       seen.add(schema);
 
@@ -166,17 +159,17 @@ export class SchemaPreprocessor {
 
       if (schema.allOf) {
         schema.allOf.forEach((s, i) => {
-          const child = new Node(node, s, [...node.path, 'allOf', i + '']);
+          const child = new Node(node, s, [...node.path, 'allOf', `${i}`]);
           recurse(node, child, opts);
         });
       } else if (schema.oneOf) {
         schema.oneOf.forEach((s, i) => {
-          const child = new Node(node, s, [...node.path, 'oneOf', i + '']);
+          const child = new Node(node, s, [...node.path, 'oneOf', `${i}`]);
           recurse(node, child, opts);
         });
       } else if (schema.anyOf) {
         schema.anyOf.forEach((s, i) => {
-          const child = new Node(node, s, [...node.path, 'anyOf', i + '']);
+          const child = new Node(node, s, [...node.path, 'anyOf', `${i}`]);
           recurse(node, child, opts);
         });
       } else if (schema.properties) {
@@ -190,7 +183,7 @@ export class SchemaPreprocessor {
 
     const initOpts = (): TraversalStates => ({
       req: { kind: 'req', path: [] },
-      res: { kind: 'res', path: [] },
+      res: { kind: 'res', path: [] }
     });
 
     for (const node of nodes.schemas) {
@@ -209,7 +202,7 @@ export class SchemaPreprocessor {
   private schemaVisitor(
     parent: SchemaObjectNode,
     node: SchemaObjectNode,
-    opts: TraversalStates,
+    opts: TraversalStates
   ) {
     const pschemas = [parent?.schema];
     const nschemas = [node.schema];
@@ -224,7 +217,7 @@ export class SchemaPreprocessor {
 
       if (nschema) {
         // This null check should no longer be necessary
-        this.handleSerDes(pschema, nschema, options);
+        this.handleSerDes(pschema, nschema);
         this.handleReadonly(pschema, nschema, options);
       }
     }
@@ -232,13 +225,12 @@ export class SchemaPreprocessor {
 
   private handleSerDes(
     parent: SchemaObject,
-    schema: SchemaObject,
-    state: TraversalState,
+    schema: SchemaObject
   ) {
     if (
-      schema.type === 'string' &&
-      !!schema.format &&
-      this.serDesMap[schema.format]
+      schema.type === 'string'
+      && !!schema.format
+      && this.serDesMap[schema.format]
     ) {
       (<any>schema).type = ['object', 'string'];
       // schema['x-eov-serdes'] = this.serDesMap[schema.format];
@@ -248,9 +240,9 @@ export class SchemaPreprocessor {
   private handleReadonly(
     parent: OpenAPIV3.SchemaObject,
     schema: OpenAPIV3.SchemaObject,
-    opts,
+    opts
   ) {
-    if (opts.kind === 'res') return;
+    if (opts.kind === 'res') {return;}
 
     const required = parent?.required ?? [];
     const prop = opts?.path?.[opts?.path?.length - 1];
@@ -271,21 +263,21 @@ export class SchemaPreprocessor {
    * @param op
    */
   private extractRequestBodySchemaNodes(
-    node: Root<OpenAPIV3.OperationObject>,
+    node: Root<OpenAPIV3.OperationObject>
   ): Root<SchemaObject>[] {
     const op = node.schema;
     const bodySchema = this.resolveSchema<OpenAPIV3.RequestBodyObject>(
-      op.requestBody,
+      op.requestBody
     );
     op.requestBody = bodySchema;
 
-    if (!bodySchema?.content) return [];
+    if (!bodySchema?.content) {return [];}
 
     const result: Root<SchemaObject>[] = [];
     const contentEntries = Object.entries(bodySchema.content);
     for (const [type, mediaTypeObject] of contentEntries) {
       const mediaTypeSchema = this.resolveSchema<SchemaObject>(
-        mediaTypeObject.schema,
+        mediaTypeObject.schema
       );
       op.requestBody.content[type].schema = mediaTypeSchema;
       const path = [...node.path, 'requestBody', 'content', type, 'schema'];
@@ -295,12 +287,14 @@ export class SchemaPreprocessor {
   }
 
   private extractResponseSchemaNodes(
-    node: Root<OpenAPIV3.OperationObject>,
+    node: Root<OpenAPIV3.OperationObject>
   ): Root<SchemaObject>[] {
     const op = node.schema;
     const responses = op.responses;
 
-    if (!responses) return;
+    if (!responses) {
+      return [];
+    }
 
     const schemas: Root<SchemaObject>[] = [];
     for (const [statusCode, response] of Object.entries(responses)) {
@@ -325,7 +319,7 @@ export class SchemaPreprocessor {
               statusCode,
               'content',
               type,
-              'schema',
+              'schema'
             ];
             schemas.push(new Root(schema, path));
           }
@@ -336,8 +330,8 @@ export class SchemaPreprocessor {
   }
 
   private resolveSchema<T>(schema): T {
-    if (!schema) return null;
-    const ref = schema?.['$ref'];
+    if (!schema) {return null;}
+    const ref = schema?.$ref;
     let res = (ref ? this.ajv.getSchema(ref)?.schema : schema) as T;
     if (ref && !res) {
       const path = ref.split('/').join('.');
@@ -353,16 +347,16 @@ export class SchemaPreprocessor {
    */
   private preprocessPathLevelParameters(
     pathItemKey: string,
-    pathItem: OpenAPIV3.PathItemObject,
+    pathItem: OpenAPIV3.PathItemObject
   ) {
     const parameters = pathItem.parameters ?? [];
 
-    if (parameters.length === 0) return;
+    if (parameters.length === 0) {return;}
 
     const v = this.resolveSchema<OpenAPIV3.OperationObject>(
-      pathItem[pathItemKey],
+      pathItem[pathItemKey]
     );
-    if (v === parameters) return;
+    if (v === parameters) {return;}
     v.parameters = v.parameters || [];
 
     for (const param of parameters) {

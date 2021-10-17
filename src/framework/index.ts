@@ -1,10 +1,9 @@
-import * as fs from 'fs';
 import * as path from 'path';
-import * as $RefParser from '@apidevtools/json-schema-ref-parser';
-import { BasePath } from './base.path';
+import * as dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
+import * as $Refs from '@apidevtools/json-schema-ref-parser/lib/refs';
 import {
   OpenAPIFrameworkArgs,
-  OpenAPIV3,
+  OpenAPIV3
 } from './types';
 import * as cloneDeep from 'lodash.clonedeep';
 
@@ -33,10 +32,10 @@ export class OpenAPIFramework {
         console.error(`${this.loggingPrefix}Validating schema`);
         console.error(
           `${this.loggingPrefix}validation errors`,
-          JSON.stringify(apiDocValidation.errors, null, '  '),
+          JSON.stringify(apiDocValidation.errors, null, '  ')
         );
         throw new Error(
-          `${this.loggingPrefix}args.apiDoc was invalid.  See the output.`,
+          `${this.loggingPrefix}args.apiDoc was invalid.  See the output.`
         );
       }
     }
@@ -45,20 +44,28 @@ export class OpenAPIFramework {
   }
 
   private async loadSpec(
-    filePath: Promise<object> | string | object,
+    schemaOrPath: Promise<object> | string | object
   ): Promise<OpenAPIV3.Document> {
-    if (typeof filePath === 'string') {
+    if (typeof schemaOrPath === 'string') {
       const origCwd = process.cwd();
-      const absolutePath = path.resolve(origCwd, filePath);
-      if (fs.existsSync(absolutePath)) {
-        // Get document, or throw exception on error
-        return Object.assign($RefParser.dereference(absolutePath));
-      } else {
-        throw new Error(
-          `${this.loggingPrefix}spec could not be read at ${filePath}`,
-        );
-      }
+      const absolutePath = path.resolve(origCwd, schemaOrPath);
+      const { access } = require('fs').promises;
+      await access(absolutePath);
+      const $RefParser = require('@apidevtools/json-schema-ref-parser');
+      return Object.assign($RefParser.dereference(absolutePath));
     }
-    return Object.assign($RefParser.dereference(cloneDeep(await filePath)));
+
+    // Test the full parser
+    // const $RefParser = require('@apidevtools/json-schema-ref-parser');
+    // const result = await $RefParser.dereference(await schemaOrPath);
+    
+    const handler = { schema: null, $refs: new $Refs() };
+    // eslint-disable-next-line no-underscore-dangle
+    const $ref = handler.$refs._add('');
+    $ref.value = cloneDeep(await schemaOrPath);
+    $ref.pathType = 'http';
+    handler.schema = $ref.value;
+    dereference(handler, { parse: {}, dereference: {} });
+    return Object.assign(handler.schema);
   }
 }

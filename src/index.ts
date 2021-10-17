@@ -1,12 +1,7 @@
-import ono from 'ono';
-import * as _uniq from 'lodash.uniq';
 import { RequestValidator } from './middlewares/openapi.request.validator';
 import {
   OpenApiValidatorOpts,
-  ValidateRequestOpts,
-  OpenApiRequest,
-  OpenApiRequestHandler,
-  OpenAPIV3,
+  OpenApiRequest
 } from './framework/types';
 import { defaultSerDes } from './framework/base.serdes';
 import { SchemaPreprocessor } from './middlewares/parsers/schema.preprocessor';
@@ -23,8 +18,12 @@ export class OpenApiValidator {
     this.validateOptions(options);
     this.normalizeOptions(options);
 
-    if (options.validateRequests == null) options.validateRequests = true;
-    if (options.formats == null) options.formats = [];
+    if (!options.validateRequests && options.validateRequests !== false) {
+      options.validateRequests = true;
+    }
+    if (!options.formats) {
+      options.formats = [];
+    }
 
     if (options.validateRequests === true) {
       options.validateRequests = {
@@ -44,7 +43,7 @@ export class OpenApiValidator {
       if (!requestValidator) {
         const spec = await specAsync;
         const ajvOpts = this.ajvOpts.preprocessor;
-        const sp = new SchemaPreprocessor(spec, ajvOpts).preProcess();
+        new SchemaPreprocessor(spec, ajvOpts).preProcess();
         requestValidator = new RequestValidator(spec, this.ajvOpts.request);
       }
 
@@ -53,18 +52,20 @@ export class OpenApiValidator {
   }
 
   private validateOptions(options: OpenApiValidatorOpts): void {
-    if (!options.apiSpec) throw ono('apiSpec required');
+    if (!options.apiSpec) {
+      throw Error('apiSpec required');
+    }
   }
 
   private normalizeOptions(options: OpenApiValidatorOpts): void {
     if (!options.serDes) {
       options.serDes = defaultSerDes;
     } else {
-      defaultSerDes.forEach((currentDefaultSerDes) => {
+      defaultSerDes.forEach(currentDefaultSerDes => {
         let defaultSerDesOverride = options.serDes.find(
-          (currentOptionSerDes) => {
+          currentOptionSerDes => {
             return currentDefaultSerDes.format === currentOptionSerDes.format;
-          },
+          }
         );
         if (!defaultSerDesOverride) {
           options.serDes.push(currentDefaultSerDes);

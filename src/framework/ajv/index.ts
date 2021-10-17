@@ -1,26 +1,25 @@
-import Ajv, { ValidateFunction, AnySchemaObject, SchemaObjCxt } from 'ajv';
+import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { formats } from './formats';
 import { OpenAPIV3, Options } from '../types';
 
 export function createRequestAjv(
   openApiSpec: OpenAPIV3.Document,
-  options: Options = {},
+  options: Options = {}
 ): Ajv {
   return createAjv(openApiSpec, options);
 }
 
 export function createResponseAjv(
   openApiSpec: OpenAPIV3.Document,
-  options: Options = {},
+  options: Options = {}
 ): Ajv {
-  return createAjv(openApiSpec, options, false);
+  return createAjv(openApiSpec, options);
 }
 
 function createAjv(
   openApiSpec: OpenAPIV3.Document,
-  options: Options = {},
-  request = true,
+  options: Options = {}
 ): Ajv {
   const ajv = new Ajv({
     strictTypes: false,
@@ -30,13 +29,13 @@ function createAjv(
     coerceTypes: 'array',
     ...options,
     logger: {
-      log(...args) { console.log(...args) },
-      warn (...args) {
+      log(...args) { console.log(...args); },
+      warn(...args) {
         if (!arguments[0]?.match('jsPropertySyntax')) {
           console.warn(...args);
         }
       },
-      error(...args) { console.error(...args) }
+      error(...args) { console.error(...args); }
     }
   });
   addFormats(ajv);
@@ -52,10 +51,10 @@ function createAjv(
   ajv.addKeyword({ keyword: 'example' });
 
   if (openApiSpec.components?.schemas) {
-    Object.entries(openApiSpec.components.schemas).forEach(([id, schema]) => {
+    Object.entries(openApiSpec.components.schemas).forEach(([id]) => {
       ajv.addSchema(
         openApiSpec.components.schemas[id],
-        `#/components/schemas/${id}`,
+        `#/components/schemas/${id}`
       );
     });
   }

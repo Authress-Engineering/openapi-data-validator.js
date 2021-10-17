@@ -18,17 +18,17 @@ export class AjvOptions {
   get request(): RequestValidatorOptions {
     const { allowUnknownQueryParameters, removeAdditional } = <
       ValidateRequestOpts
-    >this.options.validateRequests;
+    > this.options.validateRequests;
     return {
       ...this.baseOptions(),
       allowUnknownQueryParameters,
-      removeAdditional,
+      removeAdditional
     };
   }
 
   private baseOptions(): Options {
     const {
-      serDes,
+      serDes
     } = this.options;
     const serDesMap = {};
     for (const serDesObject of serDes) {
@@ -52,11 +52,11 @@ export class AjvOptions {
       formats: this.options.formats.reduce((acc, f) => {
         acc[f.name] = {
           type: f.type,
-          validate: f.validate,
+          validate: f.validate
         };
         return acc;
       }, {}),
-      serDesMap: serDesMap,
+      serDesMap: serDesMap
     };
   }
 }
