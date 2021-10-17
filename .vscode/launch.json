@@ -13,7 +13,7 @@
         ],
         // "command": "npm test"
         "program": "${workspaceFolder}/node_modules/nodemon/bin/nodemon",
-        "args": ["${workspaceFolder}/tests/modelValidator.test.js"],
+        "args": ["${workspaceFolder}/integrationTests/modelValidator.test.js"],
         "cwd": "${workspaceFolder}/src/"
       }
     ]

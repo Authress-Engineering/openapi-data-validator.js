@@ -21,9 +21,6 @@ export class OpenApiValidator {
     if (!options.validateRequests && options.validateRequests !== false) {
       options.validateRequests = true;
     }
-    if (!options.formats) {
-      options.formats = [];
-    }
 
     if (options.validateRequests === true) {
       options.validateRequests = {

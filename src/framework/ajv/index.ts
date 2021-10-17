@@ -1,6 +1,5 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { formats } from './formats';
 import { OpenAPIV3, Options } from '../types';
 
 export function createRequestAjv(
@@ -25,9 +24,6 @@ export function createRequestAjv(
     }
   });
   addFormats(ajv);
-  Object.keys({ ...formats, ...options.formats }).forEach(formatKey => {
-    ajv.addFormat(formatKey, formats[formatKey]);
-  });
   ajv.removeKeyword('propertyNames');
   ajv.removeKeyword('contains');
   ajv.removeKeyword('const');

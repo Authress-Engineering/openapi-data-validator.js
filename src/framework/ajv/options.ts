@@ -49,13 +49,6 @@ export class AjvOptions {
       useDefaults: true,
       removeAdditional: false,
       validateFormats: false,
-      formats: this.options.formats.reduce((acc, f) => {
-        acc[f.name] = {
-          type: f.type,
-          validate: f.validate
-        };
-        return acc;
-      }, {}),
       serDesMap: serDesMap
     };
   }
