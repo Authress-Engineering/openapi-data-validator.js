@@ -16,9 +16,7 @@ export class AjvOptions {
   }
 
   get request(): RequestValidatorOptions {
-    const { allowUnknownQueryParameters, removeAdditional } = <
-      ValidateRequestOpts
-    > this.options.validateRequests;
+    const { allowUnknownQueryParameters, removeAdditional } = <ValidateRequestOpts> this.options.validateRequests;
     return {
       ...this.baseOptions(),
       allowUnknownQueryParameters,

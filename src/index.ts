@@ -4,7 +4,6 @@ import {
   OpenApiRequest
 } from './framework/types';
 import { defaultSerDes } from './framework/base.serdes';
-import { SchemaPreprocessor } from './middlewares/parsers/schema.preprocessor';
 import { AjvOptions } from './framework/ajv/options';
 
 import { OpenApiSpecLoader } from './framework/openapi.spec.loader';
@@ -40,11 +39,30 @@ export class OpenApiValidator {
       if (!requestValidator) {
         const spec = await specAsync;
         const ajvOpts = this.ajvOpts.preprocessor;
+        const { SchemaPreprocessor } = require('./middlewares/parsers/schema.preprocessor');
         new SchemaPreprocessor(spec, ajvOpts).preProcess();
         requestValidator = new RequestValidator(spec, this.ajvOpts.request);
       }
 
       requestValidator.validate(request);
+    };
+  }
+
+  public async compileValidator(): Promise<void> {
+    const specAsync = new OpenApiSpecLoader({ apiDoc: this.options.apiSpec, validateApiSpec: this.options.validateApiSpec }).load();
+    const spec = await specAsync;
+    const ajvOpts = this.ajvOpts.preprocessor;
+    const { SchemaPreprocessor } = require('./middlewares/parsers/schema.preprocessor');
+    new SchemaPreprocessor(spec, ajvOpts).preProcess();
+    const requestValidator = new RequestValidator(spec, this.ajvOpts.request);
+    await requestValidator.compile(this.options.compiledFilePath);
+  }
+
+  public async loadValidator(): Promise<Function> {
+    const requestValidator = new RequestValidator(null, this.ajvOpts.request);
+    await requestValidator.loadCompiled(this.options.compiledFilePath);
+    return async (request: OpenApiRequest): Promise<void> => {
+      await requestValidator.validate(request);
     };
   }
 

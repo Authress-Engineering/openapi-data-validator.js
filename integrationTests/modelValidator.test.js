@@ -1,39 +1,40 @@
 class ModelValidator {
-  constructor() {
-    this.validator = null;
-  }
-
-  getValidator() {
-    if (this.validator) {
-      return this.validator;
-    }
-
+  async getValidator() {
     const spec = import('../tests/openapi.js').then(doc => doc.default);
     const { OpenApiValidator } = require('../dist/index');
-    const openApiValidator = new OpenApiValidator({ apiSpec: spec, validateRequests: { allowUnknownQueryParameters: false } });
-    this.validator = openApiValidator.createValidator();
-    return this.validator;
+    const openApiValidator = new OpenApiValidator({ apiSpec: spec, compiledFilePath: './compiledValidator.json', validateRequests: { allowUnknownQueryParameters: false } });
+    // return openApiValidator.createValidator();
+    await openApiValidator.compileValidator();
+    const start = Date.now();
+    const validator = await openApiValidator.loadValidator();
+    console.log('*** Validator loaded', Date.now() - start);
+    return validator;
   }
 }
-
-new ModelValidator().getValidator();
 
 // eslint-disable-next-line no-unused-vars
 async function testValidation() {
   const request = {
-    method: 'GET',
-    headers: {},
+    method: 'POST',
     query: {},
-    body: {},
-    path: { userId: 'userId', resourceUri: '*' },
-    route: '/v1/users/{userId}/resources/{resourceUri}/permissions'
+    headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+    route: '/v1/invites',
+    body: {
+      email: 'testemail@test.email',
+      statements: [{ badParameter: ['Authress:Owner'], resources: [{ resourceUri: 'Authress:*' }] }]
+    }
   };
   
-  const resultAsync = new ModelValidator().getValidator()(request);
-  // await new Promise(resolve => setTimeout(resolve, 1));
+  const validatorAsync = new ModelValidator().getValidator();
+  const validator = await validatorAsync;
   const startValidation = Date.now();
-  const result = await resultAsync;
-  console.log('*** Validation Done', Date.now() - startValidation, result);
+  const resultAsync = validator(request);
+  try {
+    const result = await resultAsync;
+    console.log('*** Validation Done', Date.now() - startValidation, result);
+  } catch (error) {
+    console.log('*** Validation Done with Error', Date.now() - startValidation, error);
+  }
 }
 
-// testValidation();
+testValidation();

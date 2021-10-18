@@ -13,7 +13,7 @@ const PARAM_TYPE = {
 type Parameter = OpenAPIV3.ReferenceObject | OpenAPIV3.ParameterObject;
 
 /**
- * A class top arse incoing parameters and populate a list of request fields e.g. id and field types e.g. query
+ * A class top arse incoming parameters and populate a list of request fields e.g. id and field types e.g. query
  * whose value must later be parsed as a JSON object, JSON Exploded Object, JSON Array, or JSON Exploded Array
  */
 export class ParametersSchemaParser {
@@ -26,7 +26,7 @@ export class ParametersSchemaParser {
   }
 
   /**
-   * Parse incoing parameters and populate a list of request fields e.g. id and field types e.g. query
+   * Parse incoming parameters and populate a list of request fields e.g. id and field types e.g. query
    * whose value must later be parsed as a JSON object, JSON Exploded Object, JSON Array, or JSON Exploded Array
    * @param path
    * @param parameters

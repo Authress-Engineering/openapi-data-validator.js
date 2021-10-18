@@ -1,11 +1,8 @@
-import * as path from 'path';
-import * as dereference from '@apidevtools/json-schema-ref-parser/lib/dereference';
-import * as $Refs from '@apidevtools/json-schema-ref-parser/lib/refs';
+
 import {
   OpenAPIFrameworkArgs,
   OpenAPIV3
 } from './types';
-import * as cloneDeep from 'lodash.clonedeep';
 
 export class OpenAPIFramework {
   private readonly args: OpenAPIFrameworkArgs;
@@ -48,6 +45,7 @@ export class OpenAPIFramework {
   ): Promise<OpenAPIV3.Document> {
     if (typeof schemaOrPath === 'string') {
       const origCwd = process.cwd();
+      const path = require('path');
       const absolutePath = path.resolve(origCwd, schemaOrPath);
       const { access } = require('fs').promises;
       await access(absolutePath);
@@ -58,6 +56,9 @@ export class OpenAPIFramework {
     // Test the full parser
     // const $RefParser = require('@apidevtools/json-schema-ref-parser');
     // const result = await $RefParser.dereference(await schemaOrPath);
+    const cloneDeep = require('lodash.clonedeep');
+    const dereference = require('@apidevtools/json-schema-ref-parser/lib/dereference');
+    const $Refs = require('@apidevtools/json-schema-ref-parser/lib/refs');
     
     const handler = { schema: null, $refs: new $Refs() };
     // eslint-disable-next-line no-underscore-dangle

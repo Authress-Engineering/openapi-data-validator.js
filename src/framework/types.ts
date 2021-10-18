@@ -74,6 +74,7 @@ export type SerDesMap = {
 
 export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
+  compiledFilePath?: string;
   validateApiSpec?: boolean;
   validateRequests?: boolean | ValidateRequestOpts;
   serDes?: SerDes[];

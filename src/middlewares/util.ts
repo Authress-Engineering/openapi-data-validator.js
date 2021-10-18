@@ -19,6 +19,10 @@ export class ContentType {
       }
     }
   }
+  public static fromString(contentType: string): ContentType {
+    return new ContentType(contentType);
+  }
+
   public static from(req: OpenApiRequest): ContentType {
     return new ContentType(req.headers?.['content-type']);
   }

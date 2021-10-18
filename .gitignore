@@ -6,3 +6,4 @@ dist
 yarn-error.log
 isolate-*.log
 results.txt
+compiledValidator.json

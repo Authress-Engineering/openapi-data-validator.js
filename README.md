@@ -30,6 +30,19 @@ const newRequest = {
 await validator(newRequest);
 ```
 
+## Compile validator
+For improved processing speed the validator can be pre-compiled from the spec
+
+```js
+const openApiValidator = new OpenApiValidator({ apiSpec: spec, compiledFilePath: './compiledValidator.json' });
+await openApiValidator.compileValidator();
+// Later
+const validator = await openApiValidator.loadValidation();
+
+// ...
+await validator(request);
+
+```
 ## FAQs
 
 #### Why not just use AJV

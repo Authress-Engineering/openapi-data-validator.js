@@ -1,5 +1,5 @@
 require('error-object-polyfill');
-const { describe, it, beforeEach, afterEach } = require('mocha');
+const { describe, it, beforeEach, afterEach, before } = require('mocha');
 const { expect } = require('chai');
 const { DateTime } = require('luxon');
 const sinon = require('sinon');
@@ -9,6 +9,15 @@ let sandbox;
 beforeEach(() => { sandbox = sinon.createSandbox(); });
 afterEach(() => sandbox.restore());
 
+let validator;
+before(async () => {
+  const spec = import('./openapi.js').then(doc => doc.default);
+  const openApiValidator = new OpenApiValidator({ apiSpec: spec, compiledFilePath: './compiledValidator.json', validateRequests: { allowUnknownQueryParameters: false } });
+  await openApiValidator.compileValidator();
+  validator = await openApiValidator.loadValidator();
+  // validator = await openApiValidator.createValidator();
+});
+
 const resourceManager = {
   primaryResourceUriPattern: '([a-zA-Z0-9-_.:+=|@]{1,128})',
   resourceUriPattern: '(([a-zA-Z0-9-_.:+=|@]{1,128})|[*])'
@@ -16,20 +25,10 @@ const resourceManager = {
 
 class ModelValidator {
   constructor() {
-    this.validator = null;
     this.validationAsync = null;
   }
 
-  getValidator() {
-    if (this.validator) {
-      return this.validator;
-    }
-
-    const spec = import('./openapi.js').then(doc => doc.default);
-    const openApiValidator = new OpenApiValidator({ apiSpec: spec, validateRequests: { allowUnknownQueryParameters: false } });
-    return this.validator = openApiValidator.createValidator();
-  }
-  startValidation(request) {
+  async validate(request) {
     const newRequest = {
       method: request.httpMethod,
       headers: request.headers,
@@ -38,16 +37,8 @@ class ModelValidator {
       path: request.pathParameters,
       route: request.route
     };
-
-    const validator = this.getValidator();
-    this.validationAsync = validator(newRequest);
-    // Ensure validation may never be called, and in those cases, we want to avoid an uncaught exception
-    this.validationAsync.catch(() => {});
-  }
-
-  async ensureValidation() {
     try {
-      await this.validationAsync;
+      await validator(newRequest);
     } catch (error) {
       const sanitizedErrorMessage = error.message.replace('|Authress:[*]', '');
       throw Error.create({ title: `InvalidRequest: ${sanitizedErrorMessage}.` }, 'InvalidInputRequest');
@@ -62,8 +53,8 @@ describe('modelValidator.js', () => {
     it('CreateAndValidateSpec', () => {
       const spec = require('./openapi');
       const oav = new OpenApiValidator({ apiSpec: spec, validateApiSpec: true, validateRequests: { allowUnknownQueryParameters: false } });
-      const validator = oav.createValidator();
-      expect(validator).to.not.eql(null, 'Request validation function must be a function');
+      const testValidator = oav.createValidator();
+      expect(testValidator).to.not.eql(null, 'Request validation function must be a function');
     });
   });
 
@@ -253,7 +244,8 @@ describe('modelValidator.js', () => {
           route: '/v1/roles'
         },
         expectedExceptionObject: {
-          title: "InvalidRequest: Unknown query parameter 'badQuery'."
+          title: 'InvalidRequest: request.query must NOT have additional properties.'
+          // title: "InvalidRequest: Unknown query parameter 'badQuery'."
         },
         skipFallback: true
       };
@@ -485,8 +477,7 @@ describe('modelValidator.js', () => {
     for (let test of tests) {
       it(test.name, async () => {
         try {
-          modelValidator.startValidation(test.request, test.skipFallback);
-          await modelValidator.ensureValidation();
+          await modelValidator.validate(test.request, test.skipFallback);
         } catch (error) {
           expect(test.expectedExceptionObject).to.not.eql(null, error);
           expect(error.message).to.eql(test.expectedExceptionObject, error);

@@ -33,11 +33,8 @@ export function createRequestAjv(
   ajv.addKeyword({ keyword: 'example' });
 
   if (openApiSpec.components?.schemas) {
-    Object.entries(openApiSpec.components.schemas).forEach(([id]) => {
-      ajv.addSchema(
-        openApiSpec.components.schemas[id],
-        `#/components/schemas/${id}`
-      );
+    Object.entries(openApiSpec.components.schemas).forEach(([id, schema]) => {
+      ajv.addSchema(schema, `#/components/schemas/${id}`);
     });
   }
 
