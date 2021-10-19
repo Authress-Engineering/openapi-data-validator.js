@@ -4,7 +4,7 @@ import {
   Options,
   RequestValidatorOptions,
   ValidateRequestOpts
-} from '../types';
+} from './types';
 
 export class AjvOptions {
   private options: OpenApiValidatorOpts;

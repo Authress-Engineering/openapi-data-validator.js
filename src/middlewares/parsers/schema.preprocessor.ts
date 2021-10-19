@@ -1,6 +1,5 @@
 import Ajv from 'ajv';
 import * as _get from 'lodash.get';
-import { createRequestAjv } from '../../framework/ajv';
 import {
   OpenAPIV3,
   SerDesMap,
@@ -64,6 +63,7 @@ export class SchemaPreprocessor {
     apiDoc: OpenAPIV3.Document,
     ajvOptions: Options
   ) {
+    const { createRequestAjv } = require('../../framework/ajv');
     this.ajv = createRequestAjv(apiDoc, ajvOptions);
     this.apiDoc = apiDoc;
     this.serDesMap = ajvOptions.serDesMap;

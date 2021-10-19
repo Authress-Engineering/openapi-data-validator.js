@@ -16,10 +16,7 @@ import {
   BodySchema,
   OpenApiRequestHandler
 } from '../framework/types';
-import { BodySchemaParser } from './parsers/body.parse';
-import { ParametersSchemaParser } from './parsers/schema.parse';
 
-type OperationObject = OpenAPIV3.OperationObject;
 type SchemaObject = OpenAPIV3.SchemaObject;
 
 function getSchemaGeneral(validationId: string, parameters: ParametersSchema, body: BodySchema): object {
@@ -86,6 +83,8 @@ export class RequestValidator {
 
   public async compile(filepath: string): Promise<void> {
     const { createRequestAjv } = require('../framework/ajv');
+    const { BodySchemaParser } = require('./parsers/body.parse');
+    const { ParametersSchemaParser } = require('./parsers/schema.parse');
     const ajvCompiled = createRequestAjv(this.apiDoc, Object.assign({ code: { source: true } }, this.options));
     const keyMap = {};
     for (const path of Object.keys(this.apiDoc.paths)) {
@@ -170,16 +169,16 @@ export class RequestValidator {
         return;
       }
       const errors = augmentAjvErrors([].concat(validator.errors ?? []));
-      const err = ajvErrorsToValidatorError(400, errors);
+      const formattedErrors = ajvErrorsToValidatorError(errors);
       let message = 'No errors';
-      if (errors && errors.length) {
-        message = errors.map(e => `request${e.instancePath} ${e.message}`).join(', ');
+      if (formattedErrors.length) {
+        message = formattedErrors.map(m => m.fullMessage).join(', ');
       }
       const error: BadRequest = new BadRequest({
         path: req.route,
         message: message
       });
-      error.errors = err.errors;
+      error.errors = formattedErrors;
       throw error;
     };
   }
@@ -200,6 +199,8 @@ export class RequestValidator {
       this.ajv = createRequestAjv(this.apiDoc, this.options);
     }
 
+    const { BodySchemaParser } = require('./parsers/body.parse');
+    const { ParametersSchemaParser } = require('./parsers/schema.parse');
     const schemaParser = new ParametersSchemaParser(this.ajv, this.apiDoc);
     const parameters = schemaParser.parse(path, reqSchema.parameters);
     const body = new BodySchemaParser().parse(path, reqSchema, contentType);
@@ -227,13 +228,13 @@ export class RequestValidator {
         return;
       }
       const errors = augmentAjvErrors([].concat(validator.errors ?? []));
-      const err = ajvErrorsToValidatorError(400, errors);
+      const formattedErrors = ajvErrorsToValidatorError(errors);
       const message = this.ajv.errorsText(errors, { dataVar: 'request' });
       const error: BadRequest = new BadRequest({
         path: req.route,
         message: message
       });
-      error.errors = err.errors;
+      error.errors = formattedErrors;
       throw error;
     };
   }

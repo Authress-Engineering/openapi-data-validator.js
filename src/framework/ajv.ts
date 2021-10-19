@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { OpenAPIV3, Options } from '../types';
+import { OpenAPIV3, Options } from './types';
 
 export function createRequestAjv(
   openApiSpec: OpenAPIV3.Document,

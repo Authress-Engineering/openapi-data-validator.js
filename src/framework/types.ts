@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { Options as AjvOptions } from 'ajv';
+import { ErrorObject, Options as AjvOptions } from 'ajv';
 
 export type BodySchema =
   | OpenAPIV3.ReferenceObject
@@ -75,7 +75,6 @@ export type SerDesMap = {
 export interface OpenApiValidatorOpts {
   apiSpec: OpenAPIV3.Document | string;
   compiledFilePath?: string;
-  validateApiSpec?: boolean;
   validateRequests?: boolean | ValidateRequestOpts;
   serDes?: SerDes[];
   formats?: Format[];
@@ -393,7 +392,6 @@ export interface OpenAPIFrameworkPathObject {
 
 interface OpenAPIFrameworkArgs {
   apiDoc: OpenAPIV3.Document | Promise<OpenAPIV3.Document> | string;
-  validateApiSpec?: boolean;
 }
 
 export interface OpenAPIFrameworkAPIContext {
@@ -468,72 +466,29 @@ export interface ValidationError {
 export interface ValidationErrorItem {
   path: string;
   message: string;
-  error_code?: string;
+  fullMessage?: string;
 }
 
 interface ErrorHeaders {
   Allow?: string;
 }
 
-export class HttpError extends Error implements ValidationError {
-  status!: number;
+export class BadRequest extends Error implements ValidationError {
+  status: number = 400;
   path?: string;
-  name!: string;
+  name: string = 'Bad Request';
   message!: string;
   headers?: ErrorHeaders;
   errors!: ValidationErrorItem[];
   constructor(err: {
-    status: number;
     path: string;
-    name: string;
     message?: string;
-    headers?: ErrorHeaders;
     errors?: ValidationErrorItem[];
   }) {
-    super(err.name);
-    this.name = err.name;
-    this.status = err.status;
+    super('Bad Request');
     this.path = err.path;
     this.message = err.message;
-    this.headers = err.headers;
-    this.errors = err.errors ?? [
-      {
-        path: err.path,
-        message: err.message
-      }
-    ];
-  }
-}
-
-export class BadRequest extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-    errors?: ValidationErrorItem[];
-  }) {
-    super({
-      status: err.overrideStatus || 400,
-      path: err.path,
-      name: 'Bad Request',
-      message: err.message,
-      errors: err.errors
-    });
-  }
-}
-
-export class UnsupportedMediaType extends HttpError {
-  constructor(err: {
-    path: string;
-    message?: string;
-    overrideStatus?: number;
-  }) {
-    super({
-      status: err.overrideStatus || 415,
-      path: err.path,
-      name: 'Unsupported Media Type',
-      message: err.message
-    });
+    this.errors = err.errors;
   }
 }
 

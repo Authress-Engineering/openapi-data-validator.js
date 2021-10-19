@@ -16,7 +16,9 @@ class ModelValidator {
 async function testValidation() {
   const request = {
     method: 'POST',
-    query: {},
+    query: {
+      badParameter: 'BadValue'
+    },
     headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
     route: '/v1/invites',
     body: {

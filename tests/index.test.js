@@ -52,7 +52,7 @@ describe('modelValidator.js', () => {
   describe('validateSpec', () => {
     it('CreateAndValidateSpec', () => {
       const spec = require('./openapi');
-      const oav = new OpenApiValidator({ apiSpec: spec, validateApiSpec: true, validateRequests: { allowUnknownQueryParameters: false } });
+      const oav = new OpenApiValidator({ apiSpec: spec, validateRequests: { allowUnknownQueryParameters: false } });
       const testValidator = oav.createValidator();
       expect(testValidator).to.not.eql(null, 'Request validation function must be a function');
     });
@@ -244,8 +244,7 @@ describe('modelValidator.js', () => {
           route: '/v1/roles'
         },
         expectedExceptionObject: {
-          title: 'InvalidRequest: request.query must NOT have additional properties.'
-          // title: "InvalidRequest: Unknown query parameter 'badQuery'."
+          title: "InvalidRequest: request.query must NOT have additional property: 'badQuery'."
         },
         skipFallback: true
       };
@@ -281,7 +280,7 @@ describe('modelValidator.js', () => {
             statements: [{ badParameter: ['Authress:Owner'], resources: [{ resourceUri: 'Authress:*' }] }]
           }
         },
-        expectedExceptionObject: { title: "InvalidRequest: request.body.statements[0] must have required property 'roles', request.body.statements[0] must NOT have additional properties." }
+        expectedExceptionObject: { title: "InvalidRequest: missing required property request.body.statements[0].roles, request.body.statements[0] must NOT have additional property: 'badParameter'." }
       };
 
       yield {

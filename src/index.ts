@@ -4,9 +4,9 @@ import {
   OpenApiRequest
 } from './framework/types';
 import { defaultSerDes } from './framework/base.serdes';
-import { AjvOptions } from './framework/ajv/options';
+import { AjvOptions } from './framework/ajvOptions';
+import { OpenAPIV3 } from './framework/types';
 
-import { OpenApiSpecLoader } from './framework/openapi.spec.loader';
 export { OpenApiValidatorOpts } from './framework/types';
 
 export class OpenApiValidator {
@@ -32,7 +32,7 @@ export class OpenApiValidator {
   }
 
   createValidator(): Function {
-    const specAsync = new OpenApiSpecLoader({ apiDoc: this.options.apiSpec, validateApiSpec: this.options.validateApiSpec }).load();
+    const specAsync = this.loadSpec(this.options.apiSpec);
 
     let requestValidator;
     return async (request: OpenApiRequest): Promise<void> => {
@@ -49,13 +49,41 @@ export class OpenApiValidator {
   }
 
   public async compileValidator(): Promise<void> {
-    const specAsync = new OpenApiSpecLoader({ apiDoc: this.options.apiSpec, validateApiSpec: this.options.validateApiSpec }).load();
+    const specAsync = this.loadSpec(this.options.apiSpec);
     const spec = await specAsync;
     const ajvOpts = this.ajvOpts.preprocessor;
     const { SchemaPreprocessor } = require('./middlewares/parsers/schema.preprocessor');
     new SchemaPreprocessor(spec, ajvOpts).preProcess();
     const requestValidator = new RequestValidator(spec, this.ajvOpts.request);
     await requestValidator.compile(this.options.compiledFilePath);
+  }
+
+  private async loadSpec(schemaOrPath: Promise<object> | string | object): Promise<OpenAPIV3.Document> {
+    if (typeof schemaOrPath === 'string') {
+      const origCwd = process.cwd();
+      const path = require('path');
+      const absolutePath = path.resolve(origCwd, schemaOrPath);
+      const { access } = require('fs').promises;
+      await access(absolutePath);
+      const $RefParser = require('@apidevtools/json-schema-ref-parser');
+      return Object.assign($RefParser.dereference(absolutePath));
+    }
+
+    // Test the full parser
+    // const $RefParser = require('@apidevtools/json-schema-ref-parser');
+    // const result = await $RefParser.dereference(await schemaOrPath);
+    const cloneDeep = require('lodash.clonedeep');
+    const dereference = require('@apidevtools/json-schema-ref-parser/lib/dereference');
+    const $Refs = require('@apidevtools/json-schema-ref-parser/lib/refs');
+    
+    const handler = { schema: null, $refs: new $Refs() };
+    // eslint-disable-next-line no-underscore-dangle
+    const $ref = handler.$refs._add('');
+    $ref.value = cloneDeep(await schemaOrPath);
+    $ref.pathType = 'http';
+    handler.schema = $ref.value;
+    dereference(handler, { parse: {}, dereference: {} });
+    return Object.assign(handler.schema);
   }
 
   public async loadValidator(): Promise<Function> {
@@ -67,7 +95,7 @@ export class OpenApiValidator {
   }
 
   private validateOptions(options: OpenApiValidatorOpts): void {
-    if (!options.apiSpec) {
+    if (!options.apiSpec && !options.compiledFilePath) {
       throw Error('apiSpec required');
     }
   }

@@ -1,5 +1,5 @@
 import { ErrorObject } from 'ajv';
-import { OpenApiRequest, ValidationError } from '../framework/types';
+import { OpenApiRequest, ValidationErrorItem } from '../framework/types';
 
 export class ContentType {
   public readonly contentType: string = null;
@@ -55,25 +55,24 @@ export function augmentAjvErrors(
   });
   return errors;
 }
-export function ajvErrorsToValidatorError(
-  status: number,
-  errors: ErrorObject[]
-): ValidationError {
-  return {
-    status,
-    errors: errors.map(e => {
-      const params: any = e.params;
-      const required
-        = params?.missingProperty && `${e.instancePath}.${params.missingProperty}`;
-      const additionalProperty
-        = params?.additionalProperty
-        && `${e.instancePath}.${params.additionalProperty}`;
-      const path = required ?? additionalProperty ?? e.instancePath ?? e.schemaPath;
-      return {
-        path,
-        message: e.message,
-        errorCode: `${e.keyword}.openapi.validation`
-      };
-    })
-  };
+export function ajvErrorsToValidatorError(errors: ErrorObject[]): ValidationErrorItem[] {
+  return errors.map(e => {
+    const params: any = e.params;
+    const required = params?.missingProperty && `${e.instancePath}.${params.missingProperty}`;
+    const additionalProperty = params?.additionalProperty && `${e.instancePath}.${params.additionalProperty}`;
+    const path = required ?? additionalProperty ?? e.instancePath ?? e.schemaPath;
+    const originalPath = e.instancePath ?? e.schemaPath;
+
+    let fullMessage = `request${path} ${e.message}`;
+    if (additionalProperty) {
+      fullMessage = `request${originalPath} must NOT have additional property: '${params.additionalProperty}'`;
+    } else if (required) {
+      fullMessage = `missing required property request${path}`;
+    }
+    return {
+      path,
+      message: e.message,
+      fullMessage
+    };
+  });
 }
