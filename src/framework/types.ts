@@ -87,6 +87,7 @@ export namespace OpenAPIV3 {
     servers?: ServerObject[];
     paths: PathsObject;
     components?: ComponentsObject;
+    security?: SecurityRequirementObject[];
     tags?: TagObject[];
     externalDocs?: ExternalDocumentationObject;
   }
@@ -154,6 +155,7 @@ export namespace OpenAPIV3 {
     responses?: ResponsesObject;
     callbacks?: { [callback: string]: ReferenceObject | CallbackObject };
     deprecated?: boolean;
+    security?: SecurityRequirementObject[];
     servers?: ServerObject[];
   }
 
@@ -232,6 +234,7 @@ export namespace OpenAPIV3 {
     not?: ReferenceObject | SchemaObject;
 
     // OpenAPI-specific properties
+    nullable?: boolean;
     discriminator?: DiscriminatorObject;
     readOnly?: boolean;
     writeOnly?: boolean;
@@ -311,6 +314,10 @@ export namespace OpenAPIV3 {
 
   export interface CallbackObject {
     [url: string]: PathItemObject;
+  }
+
+  export interface SecurityRequirementObject {
+    [name: string]: string[];
   }
 
   export interface ComponentsObject {
@@ -426,7 +433,7 @@ export interface IJsonSchema {
   minimum?: number;
   exclusiveMinimum?: boolean;
   maxLength?: number;
-  minLength?: number;met
+  minLength?: number;
   pattern?: string;
   additionalItems?: boolean | IJsonSchema;
   items?: IJsonSchema | IJsonSchema[];
