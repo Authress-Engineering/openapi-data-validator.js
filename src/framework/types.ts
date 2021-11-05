@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { ErrorObject, Options as AjvOptions } from 'ajv';
+import { Options as AjvOptions } from 'ajv';
 
 export type BodySchema =
   | OpenAPIV3.ReferenceObject
@@ -80,6 +79,7 @@ export interface OpenApiValidatorOpts {
   formats?: Format[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace OpenAPIV3 {
   export interface Document {
     openapi: string;
@@ -169,7 +169,7 @@ export namespace OpenAPIV3 {
     in: string;
   }
 
-  export interface HeaderObject extends ParameterBaseObject {}
+  export type HeaderObject = ParameterBaseObject
 
   interface ParameterBaseObject {
     description?: string;
@@ -481,9 +481,9 @@ interface ErrorHeaders {
 }
 
 export class BadRequest extends Error implements ValidationError {
-  status: number = 400;
+  status = 400;
   path?: string;
-  name: string = 'Bad Request';
+  name = 'Bad Request';
   message!: string;
   headers?: ErrorHeaders;
   errors!: ValidationErrorItem[];

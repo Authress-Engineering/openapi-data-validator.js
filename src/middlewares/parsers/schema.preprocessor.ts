@@ -33,6 +33,7 @@ class Root<T> extends Node<T, T> {
 }
 
 type SchemaObject = OpenAPIV3.SchemaObject;
+type NonArraySchemaObject = OpenAPIV3.NonArraySchemaObject;
 type SchemaObjectNode = Node<SchemaObject, SchemaObject>;
 
 interface TopLevelPathNodes {
@@ -217,7 +218,7 @@ export class SchemaPreprocessor {
 
       if (nschema) {
         // This null check should no longer be necessary
-        this.handleSerDes(pschema, nschema);
+        this.handleSerDes(pschema, nschema as NonArraySchemaObject);
         this.handleReadonly(pschema, nschema, options);
       }
     }
@@ -225,7 +226,7 @@ export class SchemaPreprocessor {
 
   private handleSerDes(
     parent: SchemaObject,
-    schema: SchemaObject
+    schema: NonArraySchemaObject
   ) {
     if (
       schema.type === 'string'

@@ -16,7 +16,7 @@ export function createRequestAjv(
     logger: {
       log(...args) { console.log(...args); },
       warn(...args) {
-        if (!arguments[0]?.match('jsPropertySyntax')) {
+        if (!(args[0] as string)?.match('jsPropertySyntax')) {
           console.warn(...args);
         }
       },
