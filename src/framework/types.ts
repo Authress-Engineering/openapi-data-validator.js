@@ -1,7 +1,10 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
-import { ErrorObject, Options as AjvOptions } from 'ajv';
+import { Options as AjvOptions } from 'ajv';
 
+/********
+ Typescript string literals are broken and require this garbage to work: https://stackoverflow.com/questions/37978528/typescript-type-string-is-not-assignable-to-type so we'll break the allowed validation using typescript interfaces, we don't really care to use this for validation of the schema, so any place we use string literals we'll allow any "STRING" until it is fixed.
+  => When fixed search here for places with `'literal' | string` and remove the string part.
+*/
 export type BodySchema =
   | OpenAPIV3.ReferenceObject
   | OpenAPIV3.SchemaObject
@@ -80,6 +83,7 @@ export interface OpenApiValidatorOpts {
   formats?: Format[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace OpenAPIV3 {
   export interface Document {
     openapi: string;
@@ -169,7 +173,7 @@ export namespace OpenAPIV3 {
     in: string;
   }
 
-  export interface HeaderObject extends ParameterBaseObject {}
+  export type HeaderObject = ParameterBaseObject
 
   interface ParameterBaseObject {
     description?: string;
@@ -184,23 +188,34 @@ export namespace OpenAPIV3 {
     examples?: { [media: string]: ReferenceObject | ExampleObject };
     content?: { [media: string]: MediaTypeObject };
   }
-  export type NonArraySchemaObjectType =
-    | 'null'
-    | 'boolean'
-    | 'object'
-    | 'number'
-    | 'string'
-    | 'integer';
-  export type ArraySchemaObjectType = 'array';
-  export type SchemaObject = ArraySchemaObject | NonArraySchemaObject;
 
+  export type SchemaObject = ArraySchemaObject | NonArraySchemaObject | AllOfSchemaObject | OneOfSchemaObject | anyOfSchemaObject | notSchemaObject;
+
+  export interface AllOfSchemaObject extends BaseSchemaObject {
+    allOf: Array<ReferenceObject | SchemaObject>;
+  }
+
+  export interface OneOfSchemaObject extends BaseSchemaObject {
+    oneOf: Array<ReferenceObject | SchemaObject>;
+  }
+
+  export interface anyOfSchemaObject extends BaseSchemaObject {
+    anyOf: Array<ReferenceObject | SchemaObject>;
+  }
+
+  export interface notSchemaObject extends BaseSchemaObject {
+    not: Array<ReferenceObject | SchemaObject>;
+  }
+
+  export type ArraySchemaObjectType = 'array';
   export interface ArraySchemaObject extends BaseSchemaObject {
-    type: ArraySchemaObjectType;
+    type: ArraySchemaObjectType | string;
     items: ReferenceObject | SchemaObject;
   }
 
+  export type NonArraySchemaObjectType = 'null' | 'boolean' | 'object' | 'number' | 'string' | 'integer';
   export interface NonArraySchemaObject extends BaseSchemaObject {
-    type: NonArraySchemaObjectType;
+    type: NonArraySchemaObjectType | string;
   }
 
   interface BaseSchemaObject {
@@ -228,10 +243,6 @@ export namespace OpenAPIV3 {
     properties?: {
       [name: string]: ReferenceObject | SchemaObject;
     };
-    allOf?: Array<ReferenceObject | SchemaObject>;
-    oneOf?: Array<ReferenceObject | SchemaObject>;
-    anyOf?: Array<ReferenceObject | SchemaObject>;
-    not?: ReferenceObject | SchemaObject;
 
     // OpenAPI-specific properties
     nullable?: boolean;
@@ -339,21 +350,22 @@ export namespace OpenAPIV3 {
     | OpenIdSecurityScheme;
 
   export interface HttpSecurityScheme {
-    type: 'http';
+    type: 'http' | string;
     description?: string;
     scheme: string;
     bearerFormat?: string;
   }
 
   export interface ApiKeySecurityScheme {
-    type: 'apiKey';
+    type: 'apiKey' | string;
     description?: string;
     name: string;
     in: string;
   }
 
   export interface OAuth2SecurityScheme {
-    type: 'oauth2';
+    type: 'oauth2' | string;
+    description?: string;
     flows: {
       implicit?: {
         authorizationUrl: string;
@@ -380,7 +392,7 @@ export namespace OpenAPIV3 {
   }
 
   export interface OpenIdSecurityScheme {
-    type: 'openIdConnect';
+    type: 'openIdConnect' | string;
     description?: string;
     openIdConnectUrl: string;
   }
@@ -481,9 +493,9 @@ interface ErrorHeaders {
 }
 
 export class BadRequest extends Error implements ValidationError {
-  status: number = 400;
+  status = 400;
   path?: string;
-  name: string = 'Bad Request';
+  name = 'Bad Request';
   message!: string;
   headers?: ErrorHeaders;
   errors!: ValidationErrorItem[];

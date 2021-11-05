@@ -4,7 +4,10 @@
       "node": true
     },
     "extends": [
-      "cimpress-atsquad"
+      "cimpress-atsquad",
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
     "plugins": [
       "@typescript-eslint",
@@ -26,9 +29,19 @@
       "no-continue": "off",
       "require-atomic-updates": "off",
       "no-constant-condition": ["error", { "checkLoops": false }],
+      "node/no-missing-import": ["error", {
+        "allowModules": [],
+        "resolvePaths": [],
+        "tryExtensions": [".js", ".ts", ".json", ".node"]
+      }],
       "node/no-missing-require": ["error", {
-        "allowModules": ["jose"]
-      }]
+        "allowModules": [],
+        "resolvePaths": [],
+        "tryExtensions": [".js", ".ts", ".json", ".node"]
+      }],
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/no-empty-function": "off"
     }
   }
   

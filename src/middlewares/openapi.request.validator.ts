@@ -191,7 +191,7 @@ export class RequestValidator {
   ): OpenApiRequestHandler {
     const reqSchema = this.apiDoc && this.apiDoc.paths[path] && this.apiDoc.paths[path][method.toLowerCase()];
     if (!reqSchema) {
-      return (): void => {};
+      return (() => {});
     }
 
     if (!this.ajv) {

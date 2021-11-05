@@ -6,8 +6,6 @@ import {
 } from '../../framework/types';
 
 export class BodySchemaParser {
-  constructor() {
-  }
   public parse(
     path: string,
     pathSchema: OpenAPIV3.OperationObject,

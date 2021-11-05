@@ -1,12 +1,11 @@
 import { RequestValidator } from './middlewares/openapi.request.validator';
 import {
   OpenApiValidatorOpts,
-  OpenApiRequest
+  OpenApiRequest,
+  OpenAPIV3
 } from './framework/types';
 import { defaultSerDes } from './framework/base.serdes';
 import { AjvOptions } from './framework/ajvOptions';
-import { OpenAPIV3 } from './framework/types';
-
 export { OpenApiValidatorOpts } from './framework/types';
 
 export class OpenApiValidator {
@@ -31,7 +30,7 @@ export class OpenApiValidator {
     this.ajvOpts = new AjvOptions(options);
   }
 
-  createValidator(): Function {
+  createValidator(): (request: OpenApiRequest) => Promise<void> {
     const specAsync = this.loadSpec(this.options.apiSpec);
 
     let requestValidator;
@@ -86,7 +85,7 @@ export class OpenApiValidator {
     return Object.assign(handler.schema);
   }
 
-  public async loadValidator(): Promise<Function> {
+  public async loadValidator(): Promise<(request: OpenApiRequest) => Promise<void>> {
     const requestValidator = new RequestValidator(null, this.ajvOpts.request);
     await requestValidator.loadCompiled(this.options.compiledFilePath);
     return async (request: OpenApiRequest): Promise<void> => {
@@ -105,7 +104,7 @@ export class OpenApiValidator {
       options.serDes = defaultSerDes;
     } else {
       defaultSerDes.forEach(currentDefaultSerDes => {
-        let defaultSerDesOverride = options.serDes.find(
+        const defaultSerDesOverride = options.serDes.find(
           currentOptionSerDes => {
             return currentDefaultSerDes.format === currentOptionSerDes.format;
           }
