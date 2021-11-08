@@ -33,7 +33,6 @@ let api = new Api({
 ```
 
 ```js
-require('error-object-polyfill');
 class ModelValidator {
   constructor() {
     this.validator = null;
@@ -81,6 +80,7 @@ class ModelValidator {
     try {
       await this.validationAsync;
     } catch (error) {
+      require('error-object-polyfill');
       throw Error.create({ title: `InvalidRequest: ${error.message}.` }, 'InvalidInputRequest);
     }
   }
