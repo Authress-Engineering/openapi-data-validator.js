@@ -24,15 +24,16 @@ let api = new Api({
   },
   errorMiddleware(request, error) {
     if (error.code === 'InvalidInputRequest') {
-      return { statusCode: 400, body: { errorCode: 'InvalidRequest', errorId: request.requestContext.requestId, title: error.message.title } }
+      return { statusCode: 400, body: { errorCode: 'InvalidRequest', title: error.message.title } }
     }
 
-    return { statusCode: 500, body: { title: 'Unexpected error', errorId: request.requestContext.requestId } };
+    return { statusCode: 500, body: { title: 'Unexpected error' } };
   }
 });
 ```
 
 ```js
+require('error-object-polyfill');
 class ModelValidator {
   constructor() {
     this.validator = null;
@@ -43,7 +44,7 @@ class ModelValidator {
     const path = require('path');
     const { OpenApiValidator } = require('openapi-data-validator');
     const compiledFilePath = path.join(__dirname, 'compiledSpecValidation.json');
-    return new OpenApiValidator({ apiSpec: spec, compiledFilePath: compiledFilePath, validateRequests: { allowUnknownQueryParameters: false } });
+    return new OpenApiValidator({ apiSpec: spec, compiledFilePath: compiledFilePath });
   }
 
   async compileValidator() {
@@ -80,9 +81,7 @@ class ModelValidator {
     try {
       await this.validationAsync;
     } catch (error) {
-      const wrapped = Error.create({ title: `InvalidRequest: ${error.message}.` });
-      wrapped.code = 'InvalidInputRequest';
-      throw wrapped;
+      throw Error.create({ title: `InvalidRequest: ${error.message}.` }, 'InvalidInputRequest);
     }
   }
 }
