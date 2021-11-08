@@ -42,6 +42,8 @@ const validator = await openApiValidator.loadValidation();
 // ...
 await validator(request);
 
+Checkout the full: [Async example](./docs/async-example.md)
+
 ```
 ## FAQs
 
