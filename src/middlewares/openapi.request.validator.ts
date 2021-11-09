@@ -68,13 +68,13 @@ export class RequestValidator {
     // cache middleware by combining method, path, and contentType
     const contentType = ContentType.from(req);
     const contentTypeKey = contentType.equivalents()[0] ?? 'not_provided';
-    const key = `${req.method}-${route}-${contentTypeKey}`.toLocaleLowerCase();
+    const key = `${req.method || req.httpMethod}-${route}-${contentTypeKey}`.toLocaleLowerCase();
 
     if (!this.middlewareCache[key]) {
       if (this.validationModule[key]) {
         this.middlewareCache[key] = this.buildMiddlewareFromModule(key);
       } else {
-        this.middlewareCache[key] = this.buildMiddleware(key, route, req.method, contentType);
+        this.middlewareCache[key] = this.buildMiddleware(key, route, req.method || req.httpMethod, contentType);
       }
     }
     
@@ -147,18 +147,11 @@ export class RequestValidator {
 
   private buildMiddlewareFromModule(validationId: string): OpenApiRequestHandler {
     return (req: OpenApiRequest): void => {
-      const cookies = req.cookies
-        ? {
-          ...req.cookies,
-          ...req.signedCookies
-        }
-        : undefined;
-
       const data = {
-        query: req.query ?? {},
-        headers: req.headers || {},
-        path: req.path || {},
-        cookies,
+        query: req.query ?? req.queryStringParameters ?? {},
+        headers: req.headers ?? {},
+        path: req.path ?? req.pathParameters ?? {},
+        cookies: req.cookies ?? {},
         body: req.body
       };
 
@@ -208,18 +201,11 @@ export class RequestValidator {
     const validator = this.ajv.compile(schemaGeneral);
 
     return (req: OpenApiRequest): void => {
-      const cookies = req.cookies
-        ? {
-          ...req.cookies,
-          ...req.signedCookies
-        }
-        : undefined;
-
       const data = {
-        query: req.query ?? {},
-        headers: req.headers || {},
-        path: req.path || {},
-        cookies,
+        query: req.query ?? req.queryStringParameters ?? {},
+        headers: req.headers ?? {},
+        path: req.path ?? req.pathParameters ?? {},
+        cookies: req.cookies ?? {},
         body: req.body
       };
 

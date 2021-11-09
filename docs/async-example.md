@@ -62,16 +62,7 @@ class ModelValidator {
   }
 
   startValidation(request) {
-    const newRequest = {
-      method: request.httpMethod,
-      headers: request.headers,
-      query: request.queryStringParameters,
-      body: request.body,
-      path: request.pathParameters,
-      route: request.route
-    };
-
-    this.validationAsync = this.getValidator().then(validator => validator(newRequest));
+    this.validationAsync = this.getValidator().then(validator => validator(request));
     // Ensure validation may never be called, and in those cases, we want to avoid an uncaught exception
     this.validationAsync.catch(() => {});
   }

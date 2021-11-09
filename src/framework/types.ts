@@ -420,14 +420,16 @@ export interface OpenAPIFrameworkAPIContext {
 }
 
 export interface OpenApiRequest {
-  route: string,
-  method: string,
-  query?: Record<string, string>,
-  headers?: Record<string, string>,
-  body?: string,
-  signedCookies?: Record<string, string>,
-  cookies?: Record<string, string>,
-  path?: Record<string, unknown>
+  route: string;
+  method?: string;
+  httpMethod?: string
+  query?: Record<string, string>;
+  queryStringParameters?: Record<string, string>;
+  headers?: Record<string, string>;
+  body?: string;
+  cookies?: Record<string, string>;
+  path?: Record<string, unknown>;
+  pathParameters?: Record<string, unknown>;
 }
 
 export type OpenApiRequestHandler = (
