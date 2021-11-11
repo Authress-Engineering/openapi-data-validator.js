@@ -6,36 +6,6 @@ const resourceManager = {
 
 const spec = {
   openapi: '3.0.0',
-  info: {
-    version: 'v1',
-    title: 'Authress',
-    description: `<p>
-<h2>Introduction</h2>
-<p>Welcome to the Authress Authorization API.
-<br>The Authress REST API provides the operations and resources necessary to create records, assign permissions, and verify any user in your platform.</p>
-<p><ul>
-  <li>Manage multitenant platforms and create user tenants for SSO connections.</li>
-  <li>Create records to assign roles and resources to grant access for users.</li>
-  <li>Check user access control by calling the authorization API at the right time.</li>
-  <li>Configure service clients to securely access services in your platform.</li>
-</ul></p>
-<p>For more in-depth scenarios check out the <a href="https://authress.io/knowledge-base" target="_blank">Authress knowledge base</a>.</p>
-</p>`,
-    contact: {
-      name: 'Authress Support',
-      email: 'support@authress.io'
-    }
-  },
-  tags: [
-    { name: 'User Permissions' },
-    { name: 'Groups' },
-    { name: 'Roles' },
-    { name: 'Access Records' },
-    { name: 'Service Clients' },
-    { name: 'Resource Permissions' },
-    { name: 'Accounts' },
-    { name: 'Login Management' }
-  ],
   paths: {
     '/v1/users/{userId}/resources': {
       get: {
@@ -51,9 +21,7 @@ const spec = {
             description: 'The user to check permissions on',
             required: true,
             schema: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 64
+              $ref: '#/components/schemas/User/properties/userId'
             }
           },
           {
@@ -234,9 +202,7 @@ const spec = {
             description: 'The user to check permissions on',
             required: true,
             schema: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 64
+              $ref: '#/components/schemas/User/properties/userId'
             }
           },
           {
@@ -289,9 +255,7 @@ const spec = {
             description: 'The user to check permissions on',
             required: true,
             schema: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 64
+              $ref: '#/components/schemas/User/properties/userId'
             }
           },
           {
@@ -349,9 +313,7 @@ const spec = {
             description: 'The user to get roles for.',
             required: true,
             schema: {
-              type: 'string',
-              minLength: 1,
-              maxLength: 64
+              $ref: '#/components/schemas/User/properties/userId'
             }
           },
           {
@@ -2162,9 +2124,7 @@ const spec = {
           description: 'The connection user.',
           required: true,
           schema: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 64
+            $ref: '#/components/schemas/User/properties/userId'
           }
         }
       ],
@@ -2619,6 +2579,16 @@ const spec = {
               }
             }
           },
+          defaultConnectionProperties: {
+            type: 'object',
+            properties: {
+              scope: {
+                type: 'string',
+                default: 'profile email openid',
+                maxLength: 128
+              }
+            }
+          },
           createdTime: {
             readOnly: true,
             type: 'string',
@@ -2837,8 +2807,9 @@ const spec = {
         properties: {
           userId: {
             type: 'string',
+            pattern: '^[a-zA-Z0-9-._|/~:@]+$',
             minLength: 1,
-            maxLength: 128
+            maxLength: 64
           }
         }
       },
@@ -3084,6 +3055,7 @@ const spec = {
       },
       AccessRequestResponse: {
         description: 'A dynamic body to support request PATCH operations',
+        type: 'object',
         additionalProperties: false,
         required: ['status'],
         properties: {
@@ -3388,12 +3360,19 @@ const spec = {
             example: ''
           },
           options: {
-            description: 'A map of client specific options',
+            description: 'A set of client specific options',
             type: 'object',
             additionalProperties: false,
             properties: {
               grantUserPermissionsAccess: {
                 description: 'Grant the client access to verify authorization on behalf of any user.',
+                type: 'boolean',
+                nullable: true,
+                example: false,
+                default: false
+              },
+              grantTokenGeneration: {
+                description: 'Grant the client access to generate oauth tokens on behalf of the Authress account. Security Warning: This means that this client can impersonate any user, and should only be used when connecting an existing custom Authorization Server to Authress, when that server does not support a standard OAuth connection.',
                 type: 'boolean',
                 nullable: true,
                 example: false,
@@ -3520,9 +3499,7 @@ const spec = {
           },
           userId: {
             readOnly: true,
-            type: 'string',
-            minLength: 1,
-            maxLength: 128
+            $ref: '#/components/schemas/User/properties/userId'
           },
           metadata: {
             description: 'A JSON object limited to 10KB. The owner identified by the sub will always have access to read and update this data. Service clients may have access if the related property on the client is set. Access is restricted to authorized users.',
@@ -3576,9 +3553,7 @@ const spec = {
             }
           },
           userId: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 128
+            $ref: '#/components/schemas/User/properties/userId'
           },
           permissions: {
             description: 'A list of the permissions',
@@ -3596,9 +3571,7 @@ const spec = {
         required: ['userId', 'roles'],
         properties: {
           userId: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 128
+            $ref: '#/components/schemas/User/properties/userId'
           },
           roles: {
             description: 'A list of the roles',
@@ -3637,9 +3610,7 @@ const spec = {
             }
           },
           userId: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 128
+            $ref: '#/components/schemas/User/properties/userId'
           },
           resources: {
             description: 'A list of the resources the user has some permission to.',
@@ -3692,9 +3663,7 @@ const spec = {
             }
           },
           userId: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 128
+            $ref: '#/components/schemas/User/properties/userId'
           },
           tokenId: {
             description: 'The unique identifier for the token',

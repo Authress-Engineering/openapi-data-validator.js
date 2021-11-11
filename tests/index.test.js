@@ -320,6 +320,40 @@ describe('modelValidator.js', () => {
       // };
 
       yield {
+        name: 'Fails on invalid userId',
+        request: {
+          path: '/v1/users/Authress%7Cgoogle-oauth2%7C108076944510346272539/resources/Authress%3AAccountBilling/permissions/UPDATE',
+          httpMethod: 'GET',
+          headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+          queryStringParameters: {},
+          pathParameters: {
+            userId: 'Authress|google-oauth2|10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008076944510346272539',
+            resourceUri: 'Authress:AccountBilling',
+            permission: 'UPDATE'
+          },
+          route: '/v1/users/{userId}/resources/{resourceUri}/permissions/{permission}'
+        },
+        expectedExceptionObject: { title: 'InvalidRequest: request.path.userId must NOT have more than 64 characters.' }
+      };
+
+      // yield {
+      //   name: 'Allows other language characters in userId',
+      //   request: {
+      //     path: '/v1/users/Authress%7Cgoogle-oauth2%7C%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B9/resources/Authress%3AAccountBilling/permissions/UPDATE',
+      //     httpMethod: 'GET',
+      //     headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+      //     queryStringParameters: {},
+      //     pathParameters: {
+      //       userId: 'Authress|google-oauth2|Сергей',
+      //       resourceUri: 'Authress:AccountBilling',
+      //       permission: 'UPDATE'
+      //     },
+      //     route: '/v1/users/{userId}/resources/{resourceUri}/permissions/{permission}'
+      //   },
+      //   expectedExceptionObject: null
+      // };
+
+      yield {
         name: 'Failed an empty space is not allowed',
         request: {
           path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Account%20Billing/permissions/UPDATE',

@@ -35,15 +35,16 @@ export class BodySchemaParser {
       }
     }
 
-    for (const requestContentType of Object.keys(requestBody.content)
-      .sort()
-      .reverse()) {
+    for (const requestContentType of Object.keys(requestBody.content).sort().reverse()) {
       if (requestContentType === '*/*') {
         content = requestBody.content[requestContentType];
         break;
       }
 
-      if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) {continue;} // not a wildcard of type application/*
+      // not a wildcard of type application/*
+      if (!new RegExp(/^[a-z]+\/\*$/).test(requestContentType)) {
+        continue;
+      }
 
       const [type] = requestContentType.split('/', 1);
 

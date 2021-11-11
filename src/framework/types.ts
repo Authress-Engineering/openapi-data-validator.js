@@ -87,7 +87,7 @@ export interface OpenApiValidatorOpts {
 export namespace OpenAPIV3 {
   export interface Document {
     openapi: string;
-    info: InfoObject;
+    info?: InfoObject;
     servers?: ServerObject[];
     paths: PathsObject;
     components?: ComponentsObject;
