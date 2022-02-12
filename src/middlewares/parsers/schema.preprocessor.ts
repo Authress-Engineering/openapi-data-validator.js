@@ -81,8 +81,8 @@ export class SchemaPreprocessor {
     };
 
     // Traverse the schemas
-    this.traverseSchemas(schemaNodes, (parent, schema, opts) =>
-      this.schemaVisitor(parent, schema, opts)
+    this.traverseSchemas(schemaNodes, (parent, schema) =>
+      this.schemaVisitor(parent, schema)
     );
   }
 
@@ -173,6 +173,9 @@ export class SchemaPreprocessor {
           const child = new Node(node, s, [...node.path, 'anyOf', `${i}`]);
           recurse(node, child, opts);
         });
+      } else if (schema.type === 'array' && schema.items) {
+        const child = new Node(node, schema.items, [...node.path, 'items']);
+        recurse(node, child, opts);
       } else if (schema.properties) {
         Object.entries(schema.properties).forEach(([id, cschema]) => {
           const path = [...node.path, 'properties', id];
@@ -202,26 +205,10 @@ export class SchemaPreprocessor {
 
   private schemaVisitor(
     parent: SchemaObjectNode,
-    node: SchemaObjectNode,
-    opts: TraversalStates
+    node: SchemaObjectNode
   ) {
-    const pschemas = [parent?.schema];
-    const nschemas = [node.schema];
-
-    // visit the node in both the request and response schema
-    for (let i = 0; i < nschemas.length; i++) {
-      const kind = i === 0 ? 'req' : 'res';
-      const pschema = pschemas[i];
-      const nschema = nschemas[i];
-      const options = opts[kind];
-      options.path = node.path;
-
-      if (nschema) {
-        // This null check should no longer be necessary
-        this.handleSerDes(pschema, nschema as NonArraySchemaObject);
-        this.handleReadonly(pschema, nschema, options);
-      }
-    }
+    this.handleSerDes(parent?.schema, node.schema as NonArraySchemaObject);
+    this.handleReadonly(parent?.schema, node.schema, node.path);
   }
 
   private handleSerDes(
@@ -241,21 +228,16 @@ export class SchemaPreprocessor {
   private handleReadonly(
     parent: OpenAPIV3.SchemaObject,
     schema: OpenAPIV3.SchemaObject,
-    opts
+    path
   ) {
-    if (opts.kind === 'res') {return;}
-
+    if (!schema.readOnly) {
+      return;
+    }
+    const prop = path?.[path?.length - 1];
     const required = parent?.required ?? [];
-    const prop = opts?.path?.[opts?.path?.length - 1];
-    const index = required.indexOf(prop);
-    if (schema.readOnly && index > -1) {
-      // remove required if readOnly
-      parent.required = required
-        .slice(0, index)
-        .concat(required.slice(index + 1));
-      if (parent.required.length === 0) {
-        delete parent.required;
-      }
+    parent.required = required.filter(p => p !== prop);
+    if (parent.required.length === 0) {
+      delete parent.required;
     }
   }
 
