@@ -17,15 +17,22 @@ const spec = require('./openapi.json');
 const openApiValidator = new OpenApiValidator({ apiSpec: spec });
 const validator = openApiValidator.createValidator();
 
+// Configure this to the client's request. It will resolve the expected schema in the spec using the method and route defined, and validate the request parameters.
 const newRequest = {
   method: 'GET',
-  headers: { Authorization: 'Bearer Token' },
-  query: { limit: 10 },
-  body: { field: true },
-  path: { user: 'userId' },
-
-  // Matched openapi specification generic route
+  // Matched openapi specification generic route, this should be the generic `path` from the spec, such as `/resources/{resourceId}/`, it must match one of them exactly.
   route: request.route
+
+  headers: { Authorization: 'Bearer Token' },
+  
+  // Query string parameters from the request
+  query: { limit: 10 },
+  
+  // Body already parsed to JSON
+  body: { field: true },
+
+  // Path parameters
+  path: { user: 'userId' }
 };
 await validator(newRequest);
 ```
