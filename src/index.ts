@@ -81,7 +81,7 @@ export class OpenApiValidator {
     $ref.value = cloneDeep(await schemaOrPath);
     $ref.pathType = 'http';
     handler.schema = $ref.value;
-    dereference(handler, { parse: {}, dereference: {} });
+    dereference(handler, { parse: {}, dereference: { excludedPathMatcher: () => false } });
     return Object.assign(handler.schema);
   }
 
