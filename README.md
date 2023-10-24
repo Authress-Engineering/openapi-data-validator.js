@@ -3,7 +3,7 @@ Lightweight OpenAPI complete request model validator. Fast, unopinionated, full 
 
 This is an open source project managed by the [Authress Engineering team](https://authress.io).
 
-[![Authress Engineering - DynamoDB-Armor](https://img.shields.io/static/v1?label=Authress+Engineering&message=DynamoDB-Armor&color=%23FBAF0B&logo=androidauto&logoColor=%23FBAF0B)](https://authress.io) [![npm version](https://badge.fury.io/js/openapi-data-validator.svg)](https://badge.fury.io/js/openapi-data-validator)
+[![Authress Engineering](https://img.shields.io/static/v1?label=Authress+Engineering&message=OpenAPI%20Data%20Validator&color=%23FBAF0B&logo=androidauto&logoColor=%23FBAF0B)](https://authress.io) [![npm version](https://badge.fury.io/js/openapi-data-validator.svg)](https://badge.fury.io/js/openapi-data-validator)
 
 ## Usage
 It is simple, and that's all there is to it!
