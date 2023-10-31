@@ -235,6 +235,9 @@ export class SchemaPreprocessor {
     }
     const prop = path?.[path?.length - 1];
     const required = parent?.required ?? [];
+    if (!parent) {
+      return;
+    }
     parent.required = required.filter(p => p !== prop);
     if (parent.required.length === 0) {
       delete parent.required;
