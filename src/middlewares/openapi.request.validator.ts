@@ -215,7 +215,8 @@ export class RequestValidator {
       }
       const errors = augmentAjvErrors([].concat(validator.errors ?? []));
       const formattedErrors = ajvErrorsToValidatorError(errors);
-      const message = this.ajv.errorsText(errors, { dataVar: 'request' });
+      // const message = this.ajv.errorsText(errors, { dataVar: 'request' });
+      const message = formattedErrors.map(m => m.fullMessage).join(', ');
       const error: BadRequest = new BadRequest({
         path: req.route,
         message: message

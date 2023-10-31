@@ -64,12 +64,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'UPDATE'
           },
@@ -81,12 +81,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success with multiple paths',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling/sub-resource/',
             permission: 'UPDATE'
           },
@@ -98,12 +98,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success with multiple paths ending not with slash',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling/sub-resource',
             permission: 'UPDATE'
           },
@@ -115,12 +115,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'ResourceUri is too long',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: Array.from({ length: 1024 }).join(' '),
             permission: 'UPDATE'
           },
@@ -132,12 +132,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'ResourceUri Allow 128 length subpaths',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: `/TopLevel/${Array.from({ length: 128 }).join('a')}/${Array.from({ length: 128 }).join('b')}/${Array.from({ length: 128 }).join('c')}`,
             permission: 'UPDATE'
           },
@@ -149,12 +149,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'ResourceUri sub path is too long',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: `/TopLevel/${Array.from({ length: 130 }).join('a')}`,
             permission: 'UPDATE'
           },
@@ -166,12 +166,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Disallow multiple "//"',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: '/TopLevel//',
             permission: 'UPDATE'
           },
@@ -183,12 +183,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Disallow multiple "//" followed by a "*"',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: '/TopLevel//*',
             permission: 'UPDATE'
           },
@@ -200,12 +200,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Disallow multiple "//" In the middle',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: '/TopLevel//subResource',
             permission: 'UPDATE'
           },
@@ -217,12 +217,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'ResourceUri is star *',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/*/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/*/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: '*',
             permission: 'UPDATE'
           },
@@ -286,12 +286,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success on permission',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'UPDATE'
           },
@@ -305,12 +305,12 @@ describe('modelValidator.js', () => {
       // yield {
       //   name: 'Success on resource with %',
       //   request: {
-      //     path: `/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/${encodeURIComponent('BillingService:Account%20 Billing')}/permissions/UPDATE`,
+      //     path: `/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/${encodeURIComponent('BillingService:Account%20 Billing')}/permissions/UPDATE`,
       //     httpMethod: 'GET',
       //     headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
       //     queryStringParameters: {},
       //     pathParameters: {
-      //       userId: 'Users|google-oauth2|108076944510346272539',
+      //       userId: 'Users|google-oauth2|10000000000000000000',
       //       resourceUri: encodeURIComponent('BillingService:Account%20 Billing'),
       //       permission: 'UPDATE'
       //     },
@@ -322,7 +322,7 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Fails on invalid userId',
         request: {
-          path: '/v1/users/Authress%7Cgoogle-oauth2%7C108076944510346272539/resources/Authress%3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Authress%7Cgoogle-oauth2%7C10000000000000000000/resources/Authress%3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
@@ -356,12 +356,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Failed an empty space is not allowed',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Account%20Billing/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Account%20Billing/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:Account Billing',
             permission: 'UPDATE'
           },
@@ -373,12 +373,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success on permission with multiple :',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'UPDATE:account:123:other-resource'
           },
@@ -390,12 +390,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success on permission with *',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10',
             resourceUri: 'BillingService:AccountBilling',
             permission: '*'
           },
@@ -407,12 +407,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Failed when permission contains multiple "::"',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'Thing::Else'
           },
@@ -424,12 +424,12 @@ describe('modelValidator.js', () => {
       yield {
         name: 'Success when permission allowed to end with *',
         request: {
-          path: '/v1/users/Users%7Cgoogle-oauth2%7C108076944510346272539/resources/Billing&3AAccountBilling/permissions/UPDATE',
+          path: '/v1/users/Users%7Cgoogle-oauth2%7C10000000000000000000/resources/Billing&3AAccountBilling/permissions/UPDATE',
           httpMethod: 'GET',
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'Multiple:permission:*'
           },
@@ -445,7 +445,7 @@ describe('modelValidator.js', () => {
           headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
           queryStringParameters: {},
           pathParameters: {
-            userId: 'Users|google-oauth2|108076944510346272539',
+            userId: 'Users|google-oauth2|10000000000000000000',
             resourceUri: 'BillingService:AccountBilling',
             permission: 'Multiple:permission:*'
           },
@@ -519,5 +519,89 @@ describe('modelValidator.js', () => {
         expect(test.expectedExceptionObject).to.eql(null, test.expectedExceptionObject && test.expectedExceptionObject.title);
       });
     }
+
+    it('Prevent infinite execution test baseline', async () => {
+      const test = {
+        name: 'Success',
+        request: {
+          path: '/v1/users/sc_ajoqKDgLALhGvm93gXHRW6E/resources/Connections%2Fcon_connection%20%2FSandbox%2FUsers%2Fu2auAAAAAA-UserID%2FCredentials/permissions/connections%3Acredentials%3Aread',
+          httpMethod: 'GET',
+          headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+          queryStringParameters: {},
+          pathParameters: {
+            userId: 'Users|google-oauth2|USER',
+            resourceUri: 'Connections/con_connection/Sandbox/Users/u2auAAAAAA-UserID/Credentials',
+            permission: 'connections:credentials:read'
+          },
+          route: '/v1/users/{userId}/resources/{resourceUri}/permissions/{permission}'
+        },
+        expectedExceptionObject: null
+      };
+
+      try {
+        await modelValidator.validate(test.request, test.skipFallback);
+      } catch (error) {
+        expect(test.expectedExceptionObject).to.not.eql(null, error);
+        expect(error.message).to.eql(test.expectedExceptionObject, error);
+        return;
+      }
+      expect(test.expectedExceptionObject).to.eql(null, test.expectedExceptionObject && test.expectedExceptionObject.title);
+    });
+
+    it('Prevent infinite execution test with extra space', async () => {
+      const test = {
+        name: 'Success',
+        request: {
+          path: '/v1/users/sc_ajoqKDgLALhGvm93gXHRW6E/resources/Connections%2Fcon_connection%20%2FSandbox%2FUsers%2Fu2auAAAAAA-UserID%2FCredentials/permissions/connections%3Acredentials%3Aread',
+          httpMethod: 'GET',
+          headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+          queryStringParameters: {},
+          pathParameters: {
+            userId: 'Users|google-oauth2|USER',
+            resourceUri: 'Connections/con_connection /Sandbox/Users/u2auAAAAAA-UserID/Credentials',
+            permission: 'connections:credentials:read'
+          },
+          route: '/v1/users/{userId}/resources/{resourceUri}/permissions/{permission}'
+        },
+        expectedExceptionObject: { title: `InvalidRequest: request.path.resourceUri must match pattern "^([*]|[/]?${resourceManager.primaryResourceUriPattern}([/]${resourceManager.resourceUriPattern}){0,9}([/][*]|[/]|)?)$".` }
+      };
+
+      try {
+        await modelValidator.validate(test.request, test.skipFallback);
+      } catch (error) {
+        expect(test.expectedExceptionObject).to.not.eql(null, error);
+        expect(error.message).to.eql(test.expectedExceptionObject, error);
+        return;
+      }
+      expect(test.expectedExceptionObject).to.eql(null, test.expectedExceptionObject && test.expectedExceptionObject.title);
+    });
+
+    it('Prevent infinite execution test with extra space and /', async () => {
+      const test = {
+        name: 'Success',
+        request: {
+          path: '/v1/users/sc_ajoqKDgLALhGvm93gXHRW6E/resources/Connections%2Fcon_connection%20%2FSandbox%2FUsers%2Fu2auAAAAAA-UserID%2FCredentials/permissions/connections%3Acredentials%3Aread',
+          httpMethod: 'GET',
+          headers: { 'Authorization': 'Bearer AUTH', 'Host': 'test13.api.authress.io', 'User-Agent': 'Amazon CloudFront' },
+          queryStringParameters: {},
+          pathParameters: {
+            userId: 'Users|google-oauth2|USER',
+            resourceUri: 'Connections/con_connection //Sandbox/Users/u2auAAAAAA-UserID/Credentials',
+            permission: 'connections:credentials:read'
+          },
+          route: '/v1/users/{userId}/resources/{resourceUri}/permissions/{permission}'
+        },
+        expectedExceptionObject: { title: `InvalidRequest: request.path.resourceUri must match pattern "^([*]|[/]?${resourceManager.primaryResourceUriPattern}([/]${resourceManager.resourceUriPattern}){0,9}([/][*]|[/]|)?)$".` }
+      };
+
+      try {
+        await modelValidator.validate(test.request, test.skipFallback);
+      } catch (error) {
+        expect(test.expectedExceptionObject).to.not.eql(null, error);
+        expect(error.message).to.eql(test.expectedExceptionObject, error);
+        return;
+      }
+      expect(test.expectedExceptionObject).to.eql(null, test.expectedExceptionObject && test.expectedExceptionObject.title);
+    });
   });
 });
