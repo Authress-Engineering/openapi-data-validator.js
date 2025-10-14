@@ -14,7 +14,7 @@
     "profile": "rm isolate-* && node --prof integrationTests/modelValidator.test.js && node --prof-process ./isolate* > results.txt && xdg-open results.txt"
   },
   "repository": {
-    "url": "https://github.com/rhosys/openapi-model-validator.js"
+    "url": "https://github.com/Authress-Engineering/openapi-data-validator.js"
   },
   "keywords": [
     "swagger",
